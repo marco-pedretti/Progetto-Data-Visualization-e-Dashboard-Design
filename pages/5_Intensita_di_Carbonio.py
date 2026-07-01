@@ -21,14 +21,6 @@ bal_all, complete_countries, _ = get_balanced_panel()
 carbon = get_carbon_intensity()
 
 
-def sidebar_controls() -> str | None:
-    with st.sidebar:
-        st.header("🔧 Confronto")
-        choice = st.selectbox("Affianca un paese alla media europea", ["(nessuno)"] + complete_countries)
-        st.caption("Il grafico e la narrazione principale restano fissi: qui si può solo aggiungere un confronto.")
-    return None if choice == "(nessuno)" else choice
-
-
 def main() -> None:
     st.title("🌍 Intensità di carbonio")
     st.markdown(
@@ -39,7 +31,11 @@ def main() -> None:
         "`carbon_intensity_elec` (gCO₂eq/kWh) misura l'esito, non la composizione."
     )
 
-    country = sidebar_controls()
+    choice = st.selectbox(
+        "Affianca un paese alla media europea (grafico e narrazione principale restano fissi)",
+        ["(nessuno)"] + complete_countries,
+    )
+    country = None if choice == "(nessuno)" else choice
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(

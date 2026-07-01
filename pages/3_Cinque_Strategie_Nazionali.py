@@ -22,13 +22,15 @@ COLOR_MAP = {label: PALETTE[key] for label, _, key in SOURCES}
 bal_all, complete_countries, _ = get_balanced_panel()
 
 
-def sidebar_controls() -> list[str]:
-    with st.sidebar:
-        st.header("🔧 Profili")
+def profile_controls() -> list[str]:
+    """Un piccolo controllo inline, non un filtro in sidebar: qui la libertà è minima
+    (sostituire un profilo), non i filtri liberi delle pagine Esplora."""
+    with st.expander("🔧 Sostituisci uno o più profili", expanded=False):
         st.caption("Puoi sostituire uno o più dei cinque profili di default con un altro paese del panel.")
+        cols = st.columns(5)
         slots = [
-            st.selectbox(f"Profilo {i + 1}", complete_countries, index=complete_countries.index(default))
-            for i, default in enumerate(PROFILE_COUNTRIES)
+            col.selectbox(f"Profilo {i + 1}", complete_countries, index=complete_countries.index(default))
+            for i, (col, default) in enumerate(zip(cols, PROFILE_COUNTRIES))
         ]
     return slots
 
@@ -44,7 +46,7 @@ def main() -> None:
         "**Italia** (fossile in calo costante, nessun nucleare, rinnovabili quasi raddoppiate)."
     )
 
-    countries = sidebar_controls()
+    countries = profile_controls()
     if len(set(countries)) < len(countries):
         st.warning("⚠️ Hai selezionato lo stesso paese più volte in slot diversi: alcuni pannelli saranno identici.")
 

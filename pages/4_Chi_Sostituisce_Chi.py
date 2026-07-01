@@ -18,25 +18,14 @@ from common import HIGHLIGHT_COUNTRIES, PALETTE, PANEL_YEAR_END, PANEL_YEAR_STAR
 bal_all, complete_countries, _ = get_balanced_panel()
 
 
-def sidebar_controls() -> tuple[int, int]:
-    with st.sidebar:
-        st.header("🔧 Anni di confronto")
-        year_start, year_end = st.slider(
-            "Confronta",
-            min_value=PANEL_YEAR_START, max_value=PANEL_YEAR_END,
-            value=(PANEL_YEAR_START, PANEL_YEAR_END),
-        )
-        st.caption(
-            "Paesi e tipo di grafico restano fissi (l'intero panel bilanciato, ranking + "
-            "scatter): l'unica libertà qui è cambiare i due anni confrontati."
-        )
-    return year_start, year_end
-
-
 def main() -> None:
     st.title("🔀 Chi sostituisce chi")
 
-    year_start, year_end = sidebar_controls()
+    year_start, year_end = st.slider(
+        "Anni di confronto (paesi e tipo di grafico restano fissi: l'unica libertà qui è cambiare i due anni)",
+        min_value=PANEL_YEAR_START, max_value=PANEL_YEAR_END,
+        value=(PANEL_YEAR_START, PANEL_YEAR_END),
+    )
     if year_start >= year_end:
         st.warning("⚠️ L'anno iniziale deve precedere l'anno finale.")
         st.stop()
