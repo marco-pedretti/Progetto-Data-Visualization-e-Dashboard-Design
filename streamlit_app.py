@@ -30,6 +30,22 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# I KPI in colonne strette (es. mappa a 5 colonne) tagliano l'unità di misura con
+# l'ellissi di default di st.metric: qui si consente al valore di andare a capo.
+st.markdown(
+    """
+    <style>
+    [data-testid="stMetricValue"] {
+        white-space: normal;
+        overflow-wrap: break-word;
+        font-size: 1.6rem;
+        line-height: 1.2;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 pages = st.navigation(
     {
         "": [st.Page("pages/0_Home.py", title="Home", icon="⚡", default=True)],
