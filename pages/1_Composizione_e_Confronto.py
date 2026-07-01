@@ -25,8 +25,6 @@ from common import (
     get_extended_panel,
 )
 
-st.set_page_config(page_title="Composizione & Confronto", page_icon="📊", layout="wide")
-
 SOURCES = [("Fossile", "fossil_electricity", "fossile"), ("Nucleare", "nuclear_electricity", "nucleare"), ("Rinnovabili", "renewables_electricity", "rinnovabili")]
 COLOR_MAP = {label: PALETTE[key] for label, _, key in SOURCES}
 

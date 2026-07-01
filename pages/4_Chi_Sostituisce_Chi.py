@@ -15,8 +15,6 @@ import streamlit as st
 
 from common import HIGHLIGHT_COUNTRIES, PALETTE, PANEL_YEAR_END, PANEL_YEAR_START, SOURCE_NOTE, get_balanced_panel, get_share_deltas
 
-st.set_page_config(page_title="Chi sostituisce chi", page_icon="🔀", layout="wide")
-
 bal_all, complete_countries, _ = get_balanced_panel()
 
 

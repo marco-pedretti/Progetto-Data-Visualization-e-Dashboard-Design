@@ -17,8 +17,6 @@ import streamlit as st
 
 from common import PALETTE, SOURCE_NOTE, get_balanced_panel, get_carbon_intensity
 
-st.set_page_config(page_title="Intensità di carbonio", page_icon="🌍", layout="wide")
-
 bal_all, complete_countries, _ = get_balanced_panel()
 carbon = get_carbon_intensity()
 

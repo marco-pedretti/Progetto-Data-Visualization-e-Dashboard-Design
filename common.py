@@ -42,6 +42,24 @@ EXTRA_COUNTRIES = ["Switzerland", "Iceland"]
 # concomitante alla crescita rinnovabile) o profilo di riferimento già discusso altrove.
 HIGHLIGHT_COUNTRIES = ["Germany", "Lithuania", "Denmark", "France", "Sweden", "Italy"]
 
+# Copertura mondiale: prima del 2000 pochissimi paesi fuori Europa hanno dati (Cap. 3.2 del
+# notebook), il 2025 è pesantemente right-censored (Cap. 3.3, ~90 paesi su 220). Il range
+# 2000-2024 è la finestra con copertura ampia e stabile per tutte le metriche della mappa.
+WORLD_YEAR_START = 2000
+WORLD_YEAR_END = 2024
+
+# Metriche disponibili per la mappa (solo settore elettrico, non emissioni economy-wide):
+# scala colore a tinta unica coerente con PALETTE per le tre fonti, RdYlGn_r per l'intensità
+# di carbonio (stesso schema del prezzo Airbnb in altri_file: rosso = peggio, verde = meglio),
+# Blues per la generazione totale (grandezza neutra, nessun giudizio di valore).
+MAP_METRICS = {
+    "Quota fossile (%)": {"col": "fossil_share_elec", "colorscale": "Greys"},
+    "Quota nucleare (%)": {"col": "nuclear_share_elec", "colorscale": "Oranges"},
+    "Quota rinnovabili (%)": {"col": "renewables_share_elec", "colorscale": "Greens"},
+    "Intensità di carbonio (gCO2/kWh)": {"col": "carbon_intensity_elec", "colorscale": "RdYlGn_r"},
+    "Generazione totale (TWh)": {"col": "electricity_generation", "colorscale": "Blues"},
+}
+
 
 @st.cache_data(show_spinner="Carico il dataset OWID...")
 def load_raw_data() -> pd.DataFrame:
@@ -125,3 +143,31 @@ def get_carbon_intensity() -> pd.DataFrame:
     df = load_raw_data()
     europe_owid = df[df["country"] == "Europe"].set_index("year")["carbon_intensity_elec"].reindex(panel_avg.index)
     return pd.DataFrame({"panel_bilanciato": panel_avg, "europe_owid": europe_owid})
+
+
+@st.cache_data(show_spinner="Carico i dati mondiali...")
+def get_world_data() -> pd.DataFrame:
+    """Tutti i paesi con iso_code valido (Europa inclusa), esclusi gli aggregati OWID (Cap. 2)."""
+    df = load_raw_data()
+    return df[df["iso_code"].notna()].copy()
+
+
+def get_scope_kpis(df_year: pd.DataFrame) -> dict:
+    """KPI pesati (generazione, quote, intensità di carbonio) su un blocco dati di un solo anno.
+
+    Stessa regola di mascheramento NaN del Cap. 4.7: l'intensità di carbonio esclude,
+    numeratore e denominatore insieme, i paesi senza carbon_intensity_elec quell'anno.
+    """
+    shares = weighted_shares(df_year)
+    ci_valid = df_year[df_year["carbon_intensity_elec"].notna()]
+    carbon_intensity = (
+        (ci_valid["carbon_intensity_elec"] * ci_valid["electricity_generation"]).sum()
+        / ci_valid["electricity_generation"].sum()
+        if len(ci_valid) else float("nan")
+    )
+    return dict(
+        n_countries=len(df_year),
+        total_generation=df_year["electricity_generation"].sum(),
+        carbon_intensity=carbon_intensity,
+        **shares,
+    )

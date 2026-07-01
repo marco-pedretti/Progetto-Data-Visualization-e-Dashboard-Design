@@ -16,8 +16,6 @@ import streamlit as st
 
 from common import PALETTE, PROFILE_COUNTRIES, SOURCE_NOTE, get_balanced_panel
 
-st.set_page_config(page_title="Cinque strategie nazionali", page_icon="🗺️", layout="wide")
-
 SOURCES = [("Fossile", "fossil_share_elec", "fossile"), ("Nucleare", "nuclear_share_elec", "nucleare"), ("Rinnovabili", "renewables_share_elec", "rinnovabili")]
 COLOR_MAP = {label: PALETTE[key] for label, _, key in SOURCES}
 

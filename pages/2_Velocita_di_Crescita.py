@@ -17,8 +17,6 @@ import streamlit as st
 
 from common import PALETTE, PANEL_YEAR_END, PANEL_YEAR_START, PROFILE_COUNTRIES, SOURCE_NOTE, get_balanced_panel
 
-st.set_page_config(page_title="Velocità di crescita", page_icon="📈", layout="wide")
-
 SOURCE_OPTIONS = {
     "Rinnovabili": ("renewables_electricity", "rinnovabili"),
     "Fossile": ("fossil_electricity", "fossile"),
