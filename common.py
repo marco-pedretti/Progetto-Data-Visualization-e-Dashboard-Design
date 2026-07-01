@@ -38,6 +38,9 @@ PROFILE_COUNTRIES = ["France", "Germany", "Poland", "Denmark", "Italy"]
 # Esclusi dal panel bilanciato per serie incomplete 1990-2022 (Cap. 4.1): selezionabili
 # a parte con avviso, mai inclusi di default (Svizzera e Islanda sono casi estremi).
 EXTRA_COUNTRIES = ["Switzerland", "Iceland"]
+# Paesi da evidenziare nello scatter di correlazione (Cap. 4.6): eccezione (calo nucleare
+# concomitante alla crescita rinnovabile) o profilo di riferimento già discusso altrove.
+HIGHLIGHT_COUNTRIES = ["Germany", "Lithuania", "Denmark", "France", "Sweden", "Italy"]
 
 
 @st.cache_data(show_spinner="Carico il dataset OWID...")
@@ -83,3 +86,42 @@ def weighted_shares(d: pd.DataFrame) -> dict:
     """Quote fossile/nucleare/rinnovabili pesate per generazione, su un blocco dati già filtrato."""
     tot = d["electricity_generation"].sum()
     return {label: d[f"{col}_electricity"].sum() / tot * 100 for label, col in SOURCE_COLS.items()}
+
+
+def get_share_deltas(bal_all: pd.DataFrame, year_start: int, year_end: int) -> pd.DataFrame:
+    """Variazione delle quote fossile/nucleare/rinnovabili tra due anni, un valore per paese.
+
+    Stessa logica del Cap. 4.4/4.6 del notebook (pivot su due anni, differenza). Richiesta da
+    entrambe le pagine "Chi sostituisce chi" (ranking e correlazione) sugli stessi due anni.
+    """
+    two_years = bal_all[bal_all["year"].isin([year_start, year_end])].pivot_table(
+        index="country", columns="year",
+        values=["fossil_share_elec", "nuclear_share_elec", "renewables_share_elec"],
+    )
+    return pd.DataFrame({
+        "d_fossil": two_years["fossil_share_elec"][year_end] - two_years["fossil_share_elec"][year_start],
+        "d_nuclear": two_years["nuclear_share_elec"][year_end] - two_years["nuclear_share_elec"][year_start],
+        "d_renewables": two_years["renewables_share_elec"][year_end] - two_years["renewables_share_elec"][year_start],
+        "start_renewables": two_years["renewables_share_elec"][year_start],
+        "start_nuclear": two_years["nuclear_share_elec"][year_start],
+    })
+
+
+@st.cache_data(show_spinner="Calcolo l'intensità di carbonio...")
+def get_carbon_intensity() -> pd.DataFrame:
+    """Intensità di carbonio (gCO2eq/kWh): media pesata sul panel bilanciato + validazione OWID.
+
+    Esclude dal calcolo, numeratore e denominatore insieme, le righe senza carbon_intensity_elec:
+    la Russia non ha questa colonna per il 1990-1999 e, se non esclusa da entrambi i lati del
+    rapporto, abbassa artificialmente la media proprio nei primi anni (bug trovato e corretto nel
+    Cap. 4.7 del notebook). "europe_owid" è l'aggregato pubblicato direttamente da OWID, usato lì
+    come validazione indipendente del calcolo sul panel.
+    """
+    bal_all, _, _ = get_balanced_panel()
+    valid = bal_all[bal_all["carbon_intensity_elec"].notna()]
+    panel_avg = valid.groupby("year").apply(
+        lambda g: (g["carbon_intensity_elec"] * g["electricity_generation"]).sum() / g["electricity_generation"].sum()
+    )
+    df = load_raw_data()
+    europe_owid = df[df["country"] == "Europe"].set_index("year")["carbon_intensity_elec"].reindex(panel_avg.index)
+    return pd.DataFrame({"panel_bilanciato": panel_avg, "europe_owid": europe_owid})
