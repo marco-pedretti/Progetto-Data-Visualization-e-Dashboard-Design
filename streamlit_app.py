@@ -13,6 +13,7 @@ Struttura dell'app (vedi pages/):
     3_Cinque_Strategie_Nazionali → Storia: profili fissi, narrazione guidata
     4_Chi_Sostituisce_Chi        → Storia: ranking e correlazione, narrazione guidata
     5_Intensita_di_Carbonio      → Storia: decarbonizzazione, narrazione guidata
+    7_Declino_Nucleare           → Storia: picco/evento/crollo del nucleare, narrazione guidata
 
 Le pagine "Esplora" permettono di scegliere liberamente paesi e periodo, ma restano
 vincolate al panel bilanciato (33 paesi con serie complete 1990-2022, Svizzera e
@@ -58,6 +59,7 @@ pages = st.navigation(
             st.Page("pages/3_Cinque_Strategie_Nazionali.py", title="Cinque strategie nazionali", icon="🧭"),
             st.Page("pages/4_Chi_Sostituisce_Chi.py", title="Chi sostituisce chi", icon="🔀"),
             st.Page("pages/5_Intensita_di_Carbonio.py", title="Intensità di carbonio", icon="🌍"),
+            st.Page("pages/7_Declino_Nucleare.py", title="Declino del nucleare", icon="☢️"),
         ],
     },
     position="top",

@@ -42,6 +42,17 @@ EXTRA_COUNTRIES = ["Switzerland", "Iceland"]
 # concomitante alla crescita rinnovabile) o profilo di riferimento già discusso altrove.
 HIGHLIGHT_COUNTRIES = ["Germany", "Lithuania", "Denmark", "France", "Sweden", "Italy"]
 
+# Cap. 4.8: i 5 paesi isolati in 4.6 come eccezione (calo nucleare concomitante alla crescita
+# rinnovabile), con l'evento politico che spiega il declino — anno e didascalia verificati contro
+# il picco/valore 2022 reale di nuclear_share_elec, non solo affermati.
+NUCLEAR_EVENTS = {
+    "Lithuania": (2009, "Chiusura Ignalina (UE)"),
+    "Germany": (2011, "Fukushima → Energiewende"),
+    "Sweden": (2005, "Chiusura Barsebäck"),
+    "Belgium": (2003, "Legge di phase-out"),
+    "France": (2015, "Legge transizione energetica"),
+}
+
 # Copertura mondiale: prima del 2000 pochissimi paesi fuori Europa hanno dati (Cap. 3.2 del
 # notebook), il 2025 è pesantemente right-censored (Cap. 3.3, ~90 paesi su 220). Il range
 # 2000-2024 è la finestra con copertura ampia e stabile per tutte le metriche della mappa.
@@ -143,6 +154,20 @@ def get_carbon_intensity() -> pd.DataFrame:
     df = load_raw_data()
     europe_owid = df[df["country"] == "Europe"].set_index("year")["carbon_intensity_elec"].reindex(panel_avg.index)
     return pd.DataFrame({"panel_bilanciato": panel_avg, "europe_owid": europe_owid})
+
+
+@st.cache_data(show_spinner="Carico la storia del nucleare...")
+def get_nuclear_history(countries: list[str]) -> pd.DataFrame:
+    """Quota nucleare 1985-2022 per un elenco di paesi, dalla serie estesa (non il panel bilanciato).
+
+    Serve perché il picco storico di alcuni paesi (Belgio 1986, Lituania 1993) cade a ridosso o
+    prima della soglia 1990 del panel bilanciato (Cap. 4.1): qui non serve la completezza su tutte
+    le KEY_COLS, solo nuclear_share_elec (Cap. 4.8 del notebook).
+    """
+    df = load_raw_data()
+    df_eu = df[df["iso_code"].isin(EUROPE_ISO)].copy()
+    d = df_eu[df_eu["country"].isin(countries) & (df_eu["year"] <= PANEL_YEAR_END)]
+    return d[["country", "year", "nuclear_share_elec"]].dropna(subset=["nuclear_share_elec"])
 
 
 @st.cache_data(show_spinner="Carico i dati mondiali...")

@@ -10,6 +10,10 @@ portato a questa correzione resta nel notebook, non in dashboard.
 
 Libertà limitata: si può affiancare alla media europea l'andamento di un singolo
 paese, ma il grafico e la narrazione principale restano fissi.
+
+Estesa (← Cap. 4.9 del notebook) con uno scatter fisso quota fossile vs intensità di
+carbonio sull'ultimo anno del panel, per mostrare esplicitamente perché le due
+metriche sono correlate ma non intercambiabili.
 """
 
 import plotly.graph_objects as go
@@ -91,6 +95,47 @@ def main() -> None:
                 f"{country_last.iloc[0]:.0f} gCO₂/kWh: {relazione} della media europea di un "
                 f"fattore {ratio:.1f}×."
             )
+
+    st.divider()
+    st.subheader("Perché l'intensità di carbonio, non solo la quota fossile")
+
+    y_last = bal_all[(bal_all["year"] == last_year) & (bal_all["carbon_intensity_elec"].notna())]
+    corr_fc = y_last["fossil_share_elec"].corr(y_last["carbon_intensity_elec"])
+
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(
+        x=y_last["fossil_share_elec"], y=y_last["carbon_intensity_elec"], mode="markers",
+        marker=dict(color=PALETTE["fossile"], size=9, opacity=0.7, line=dict(color="white", width=1)),
+        text=y_last["country"],
+        hovertemplate="%{text}<br>Fossile: %{x:.1f}%<br>Intensità: %{y:.0f} gCO₂/kWh<extra></extra>",
+        showlegend=False,
+    ))
+    for c in ["Germany", "Netherlands", "Poland", "Norway", "France", "Italy"]:
+        row = y_last[y_last["country"] == c]
+        if not row.empty:
+            fig2.add_trace(go.Scatter(
+                x=row["fossil_share_elec"], y=row["carbon_intensity_elec"], mode="markers+text",
+                marker=dict(color=PALETTE["calo"], size=10), text=[c], textposition="top center",
+                showlegend=False, hoverinfo="skip",
+            ))
+    fig2.update_layout(
+        title=f"r = {corr_fc:.2f} — ma a parità di quota fossile l'intensità varia ancora",
+        xaxis_title="Quota fossile (%)", yaxis_title="Intensità di carbonio (gCO₂/kWh)",
+        template="plotly_white", height=480,
+    )
+    st.plotly_chart(fig2, width="stretch")
+    st.caption(f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, {last_year}")
+
+    st.markdown(
+        f"La correlazione è fortissima (**r = {corr_fc:.2f}**): la quota fossile spiega la quasi "
+        "totalità della varianza dell'intensità di carbonio. Ma le due metriche non sono "
+        "intercambiabili: **Germania** (49.5% fossile, 420 gCO₂/kWh) e **Paesi Bassi** (56.4% "
+        "fossile, 326 gCO₂/kWh) hanno quote fossili simili — la Germania perfino più bassa — ma "
+        "un'intensità molto diversa, perché il mix fossile non è omogeneo: il carbone (in "
+        "particolare la lignite tedesca) emette più del gas naturale (dominante nel mix olandese) "
+        "a parità di quota di generazione. La quota fossile dice *quanto* fossile c'è; l'intensità "
+        "di carbonio dice *quanto inquina* quel fossile."
+    )
 
 
 if __name__ == "__main__":
