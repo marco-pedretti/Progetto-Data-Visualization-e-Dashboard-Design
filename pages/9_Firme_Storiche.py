@@ -52,61 +52,103 @@ def get_series_bounds() -> pd.DataFrame:
 
 
 def timeline_figure(bounds: pd.DataFrame) -> go.Figure:
-    """Gantt della disponibilità dati: una barra per paese, dal primo all'ultimo anno.
+    """Gantt della disponibilità dati, compresso sulle righe che raccontano qualcosa.
 
-    L'ordinamento è il messaggio: le eccezioni colorate in alto (2005 → 2000 → 1990),
-    la massa uniforme del 1985 in grigio sotto — si vede a colpo d'occhio che il 1985
-    è la regola del continente, non la firma di un blocco.
+    Le eccezioni colorate in alto (2005 → 2000 → 1990); del blocco 1985 restano come
+    righe singole solo Ucraina e Islanda (le uniche con la serie tronca, per ragioni
+    opposte) — gli altri paesi, tutti identici 1985–ultimo anno, sono raggruppati in
+    un'unica riga: 31 barre grigie uguali erano rumore, una sola dice lo stesso.
     """
-    waves = sorted(bounds["first"].unique())  # [1985, 1990, 2000, 2005]
+    late = bounds[bounds["first"] > 1985]
+    notable_ends = ["Ukraine", "Iceland"]
+    normal = bounds[(bounds["first"] == 1985) & (~bounds["country"].isin(notable_ends))]
+    n_norm = len(normal)
+    agg_label = f"Altri {n_norm} paesi"
+    agg_last = int(normal["last"].max())
 
-    # Ordine top-down: prima le soglie tardive, alfabetico dentro ogni gruppo; Plotly
-    # elenca categoryarray dal basso verso l'alto, quindi si passa la lista rovesciata.
+    # Ordine top-down: soglie tardive, poi le due serie tronche, poi la riga aggregata;
+    # Plotly elenca categoryarray dal basso verso l'alto, quindi si passa la lista rovesciata.
     top_down: list[str] = []
-    for wave in sorted(waves, reverse=True):
-        top_down += sorted(bounds.loc[bounds["first"] == wave, "country"])
+    for wave in [2005, 2000, 1990]:
+        top_down += sorted(late.loc[late["first"] == wave, "country"])
+    top_down += notable_ends + [agg_label]
 
     fig = go.Figure()
-    for wave in sorted(waves, reverse=True):
-        grp = bounds[bounds["first"] == wave].sort_values("country")
-        n = len(grp)
+    for wave in [2005, 2000, 1990]:
+        grp = late[late["first"] == wave].sort_values("country")
         fig.add_trace(go.Bar(
             y=grp["country"], x=grp["last"] - grp["first"], base=grp["first"],
-            orientation="h", marker_color=WAVE_COLORS[wave], name=f"dal {wave} ({n})",
+            orientation="h", marker_color=WAVE_COLORS[wave], name=f"dal {wave} ({len(grp)})",
             customdata=grp["last"],
             hovertemplate="%{y}: %{base}–%{customdata}<extra></extra>",
         ))
+
+    # Blocco 1985: Ucraina e Islanda singole + riga aggregata (hover con l'elenco completo).
+    b = bounds.set_index("country")
+    ukr_last, ice_last = int(b.loc["Ukraine", "last"]), int(b.loc["Iceland", "last"])
+    names = sorted(normal["country"])
+    names_wrapped = "<br>".join(", ".join(names[i:i + 6]) for i in range(0, len(names), 6))
+    grey_last = [ukr_last, ice_last, agg_last]
+    fig.add_trace(go.Bar(
+        y=notable_ends + [agg_label], x=[v - 1985 for v in grey_last], base=[1985] * 3,
+        orientation="h", marker_color=WAVE_COLORS[1985], name=f"dal 1985 ({n_norm + 2})",
+        hovertext=[f"Ukraine: 1985–{ukr_last}", f"Iceland: 1985–{ice_last}",
+                   f"{n_norm} paesi, 1985–{agg_last}:<br>{names_wrapped}"],
+        hoverinfo="text",
+    ))
 
     # Il 1985 non è un evento: è il momento in cui la fonte inizia a pubblicare.
     fig.add_vline(x=1985, line_dash="dot", line_color="#888888", line_width=1)
     fig.add_annotation(
         x=1985, y=1.0, yref="paper", yanchor="bottom",
-        text="1985 — inizio pubblicazione della fonte, non un evento storico",
+        text="1985 — inizio pubblicazione della fonte",
         showarrow=False, xanchor="left", font=dict(size=10, color="#888888"),
     )
-    # L'evento storico vero è il 1991: le serie tardive partono tutte DOPO, mai prima.
-    fig.add_vline(x=1991, line_dash="dash", line_color="#888888", line_width=1)
+
+    # Gli eventi storici veri, sotto l'asse su due livelli sfalsati per non sovrapporre
+    # le etichette tra loro (1990/1991/1993 distano un anno) né con i tick dell'asse
+    # (per questo partono da y=-0.16, sotto la fascia dei tick); la riunificazione
+    # tedesca è ancorata a destra così il testo occupa la zona vuota pre-1990.
+    # xshift: scostamento orizzontale in PIXEL della sola etichetta (positivo = destra),
+    # la linea resta su x — è la manopola per aggiustare a occhio le posizioni.
+    events = [
+        (1990, -0.16, "right", 35, "1990 · riunificazione tedesca "),
+        (1993, -0.16, "left", 0, " 1993 · divorzio di velluto cecoslovacco"),
+        (2006, -0.16, "left", 0, " 2006 · indipendenza del Montenegro"),
+        (1991, -0.22, "left", -15, " 1991 · dissoluzione dell'URSS · indipendenze jugoslave"),
+    ]
+    for x, y, anchor, xshift, txt in events:
+        fig.add_vline(x=x, line_dash="dash", line_color="#888888", line_width=1)
+        fig.add_annotation(x=x, y=y, yref="paper", text=txt, showarrow=False, xshift=xshift,
+                           xanchor=anchor, font=dict(size=10, color="#888888"))
+
+    # La guerra di Bosnia come banda ombreggiata: spiega perché la serie bosniaca
+    # arriva solo nel 2000, cinque anni dopo Dayton. L'etichetta sta subito a destra
+    # della banda, nella zona vuota prima dell'inizio delle barre del 2000 (le righe
+    # alte del grafico non hanno barre prima del 2000), non tra le linee tratteggiate.
+    fig.add_vrect(x0=1992, x1=1995, fillcolor=PALETTE["calo"], opacity=0.06, line_width=0)
     fig.add_annotation(
-        x=1991, y=-0.05, yref="paper", text="1991 — crollo URSS, indipendenze jugoslave",
-        showarrow=False, xanchor="left", font=dict(size=10, color="#888888"),
+        x=1993.5, y=0.84, yref="paper", yanchor="middle", xanchor="left",
+        text="guerra di<br>Bosnia 1992–95",
+        showarrow=False, font=dict(size=9, color=PALETTE["calo"]), align="left",
     )
+
     # L'unica serie interrotta prima del presente per un evento (non per ritardo di
     # pubblicazione): l'Ucraina si ferma al 2022.
-    ukr = bounds.loc[bounds["country"] == "Ukraine"].iloc[0]
     fig.add_trace(go.Scatter(
-        x=[ukr["last"]], y=["Ukraine"], mode="markers+text",
+        x=[ukr_last], y=["Ukraine"], mode="markers+text",
         marker=dict(color=PALETTE["calo"], size=9, symbol="x"),
-        text=[f"  guerra: dati fermi al {ukr['last']}"], textposition="middle right",
+        text=[f"  invasione russa: dati fermi al {ukr_last}"], textposition="middle right",
         textfont=dict(size=10, color=PALETTE["calo"]), showlegend=False, hoverinfo="skip",
     ))
 
     fig.update_layout(
         title=dict(text="Quasi tutta Europa parte nel 1985: le eccezioni ricalcano la dissoluzione jugoslava", y=0.98, yanchor="top"),
-        template="plotly_white", height=820, barmode="overlay", bargap=0.35,
+        template="plotly_white", height=520, barmode="overlay", bargap=0.35,
         xaxis=dict(range=[1979, 2034], title=""),
-        yaxis=dict(categoryorder="array", categoryarray=list(reversed(top_down)), tickfont=dict(size=10)),
-        legend=dict(orientation="h", yanchor="bottom", y=1.055),
-        margin=dict(l=10, r=10, t=150, b=40),
+        yaxis=dict(categoryorder="array", categoryarray=list(reversed(top_down)), tickfont=dict(size=11)),
+        legend=dict(orientation="h", yanchor="bottom", y=1.07),
+        margin=dict(l=10, r=10, t=130, b=125),
     )
     return fig
 
@@ -128,7 +170,14 @@ def main() -> None:
     late = bounds[bounds["first"] > 1985]
 
     st.plotly_chart(timeline_figure(bounds), width="stretch")
-    st.caption(f"{SOURCE_NOTE} — electricity_generation, copertura Europa ({n_total} paesi), zero gap interni")
+    st.caption(
+        f"{SOURCE_NOTE} — electricity_generation, copertura Europa ({n_total} paesi), zero gap "
+        "interni: le barre sono continue perché le serie lo sono davvero, non per semplificazione. "
+        "(I buchi interni esistono nel dataset, ma su altre variabili — l'eolico ne ha in 13 paesi, "
+        "2000-2013, Cap. 3.2 del notebook.) Le serie identiche 1985–2025 sono raggruppate in "
+        "un'unica riga (elenco completo al passaggio del mouse); Ucraina e Islanda restano singole "
+        "perché la loro serie si interrompe prima."
+    )
 
     st.subheader("⚠️ La trappola del 1985")
     st.markdown(
