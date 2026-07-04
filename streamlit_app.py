@@ -8,7 +8,6 @@ volta per l'intera app: vive qui, non nelle singole pagine.
 Struttura dell'app (vedi pages/):
     0_Home                       → panoramica, KPI, guida alla navigazione
     3_Cinque_Strategie_Nazionali → Esplora: confronto testa-a-testa tra due paesi a scelta
-    2_Velocita_di_Crescita       → Esplora: filtri liberi (paesi, fonte), valore assoluto vs indice
     6_Mappa_Europa_Mondo         → Esplora: coropleta con ambito/metrica/anno liberi
     8_Scheda_Paese               → Esplora: scheda libera su un'entità qualunque, mondo incluso
     4_Chi_Sostituisce_Chi        → Storia: ranking e correlazione, narrazione guidata
@@ -55,7 +54,6 @@ pages = st.navigation(
         "": [st.Page("pages/0_Home.py", title="Home", icon="⚡", default=True)],
         "Esplora": [
             st.Page("pages/3_Cinque_Strategie_Nazionali.py", title="Strategie a confronto", icon="🆚"),
-            st.Page("pages/2_Velocita_di_Crescita.py", title="Velocità di crescita", icon="📈"),
             st.Page("pages/6_Mappa_Europa_Mondo.py", title="Mappa Europa/Mondo", icon="🗺️"),
             st.Page("pages/8_Scheda_Paese.py", title="Scheda Paese", icon="🔎"),
         ],

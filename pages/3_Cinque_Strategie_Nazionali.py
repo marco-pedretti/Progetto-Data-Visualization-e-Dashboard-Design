@@ -12,7 +12,9 @@ La pagina alterna due registri:
   stack di paesi diversi non stanno sullo stesso grafico);
 - una sezione **unificata** (due linee sullo stesso asse) per le metriche scalari-per-anno,
   dove la sovrapposizione diretta è proprio il confronto — con un selettore di metrica che
-  è la parte di esplorazione libera vera e propria.
+  è la parte di esplorazione libera vera e propria — più la crescita di una fonte nel tempo
+  (valore assoluto o indice 1990 = 100, ex pagina "Velocità di crescita" confluita qui: la
+  crescita è un dato come gli altri, non una lezione a sé).
 
 Vincolata al panel bilanciato (33 paesi, 1990-2022) come le altre pagine di confronto:
 serie complete = confronto onesto. Svizzera e Islanda restano aggiungibili a parte, con
@@ -61,6 +63,14 @@ COMPARE_METRICS = {
     "Elettricità pro-capite (kWh)": ("per_capita_electricity", "kWh/persona", False, False),
     "Emissioni pro-capite, settore elettrico (t CO₂eq)": ("ghg_per_capita_elec", "t CO₂eq/persona", False, False),
     "Generazione totale (TWh)": ("electricity_generation", "TWh", False, True),
+}
+
+# Crescita di una fonte nel tempo (assoluta o indicizzata al primo anno = 100).
+GROWTH_SOURCES = {
+    "Rinnovabili": "renewables_electricity",
+    "Fossile": "fossil_electricity",
+    "Nucleare": "nuclear_electricity",
+    "Generazione totale": "electricity_generation",
 }
 
 _, COMPLETE_COUNTRIES, _ = get_balanced_panel()
@@ -246,6 +256,51 @@ def main() -> None:
                 f"Nel **{year}**, {metric_label.split(' (')[0].lower()}: **{country_a}** {va:.1f} {unit} · "
                 f"**{country_b}** {vb:.1f} {unit}. Divario: **{higher}** più alto di {gap:.1f} {unit}{ratio}."
             )
+
+    st.divider()
+
+    # --- Crescita di una fonte nel tempo: assoluto o indicizzato ---
+    st.subheader("Crescita di una fonte nel tempo")
+    g1, g2 = st.columns([2, 3])
+    growth_source = g1.selectbox("Fonte", list(GROWTH_SOURCES.keys()))
+    representation = g2.radio(
+        "Come rappresentarla", ["Indice di crescita (1990 = 100)", "Valore assoluto (TWh)"],
+        horizontal=True,
+        help="L'indice mostra quanto è cresciuta ciascuna fonte rispetto al 1990; il valore assoluto i TWh effettivi.",
+    )
+    gcol = GROWTH_SOURCES[growth_source]
+    as_index = representation.startswith("Indice")
+
+    gfig = go.Figure()
+    skipped = []
+    for country, d_c, color in [(country_a, da, COUNTRY_COLORS[0]), (country_b, db, COUNTRY_COLORS[1])]:
+        s = d_c.set_index("year")[gcol].dropna() if gcol in d_c.columns else None
+        if s is None or s.empty:
+            continue
+        if as_index:
+            base = float(s.iloc[0])
+            if base <= 0:  # fonte assente nel primo anno (es. nucleare in un paese senza): indice non definito
+                skipped.append(country)
+                continue
+            s = s / base * 100
+        gfig.add_trace(go.Scatter(x=s.index, y=s.values, name=country, line=dict(color=color, width=2.8)))
+
+    if as_index:
+        gfig.add_hline(y=100, line_dash="dot", line_color="#888888")
+        y_title = "Indice (1990 = 100)"
+    else:
+        y_title = "TWh"
+        gfig.update_yaxes(rangemode="tozero")  # l'indice no: la sua ancora di lettura è 100, non 0
+    gfig.update_layout(
+        title=f"{growth_source} — {'indice di crescita' if as_index else 'valore assoluto (TWh)'}",
+        yaxis_title=y_title, template="plotly_white", height=440,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+    )
+    st.plotly_chart(gfig, width="stretch")
+    note = SOURCE_NOTE
+    if skipped:
+        note = f"Indice non calcolabile per {', '.join(skipped)} (fonte nulla nel 1990). " + note
+    st.caption(note)
 
 
 if __name__ == "__main__":
