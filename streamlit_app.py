@@ -15,6 +15,7 @@ Struttura dell'app (vedi pages/):
     4_Chi_Sostituisce_Chi        → Storia: ranking e correlazione, narrazione guidata
     5_Intensita_di_Carbonio      → Storia: decarbonizzazione, narrazione guidata
     7_Declino_Nucleare           → Storia: picco/evento/crollo del nucleare, narrazione guidata
+    9_Firme_Storiche             → Storia: i dati mancanti come indicatore geopolitico (Cap. 3.4)
 
 Le pagine "Esplora" permettono di scegliere liberamente paesi e periodo, ma restano
 vincolate al panel bilanciato (33 paesi con serie complete 1990-2022, Svizzera e
@@ -64,6 +65,7 @@ pages = st.navigation(
             st.Page("pages/4_Chi_Sostituisce_Chi.py", title="Chi sostituisce chi", icon="🔀"),
             st.Page("pages/5_Intensita_di_Carbonio.py", title="Intensità di carbonio", icon="🌍"),
             st.Page("pages/7_Declino_Nucleare.py", title="Declino del nucleare", icon="☢️"),
+            st.Page("pages/9_Firme_Storiche.py", title="Firme storiche nei dati", icon="🕰️"),
         ],
     },
     position="top",
