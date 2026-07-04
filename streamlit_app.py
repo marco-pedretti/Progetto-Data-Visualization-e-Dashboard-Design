@@ -53,9 +53,9 @@ pages = st.navigation(
     {
         "": [st.Page("pages/0_Home.py", title="Home", icon="⚡", default=True)],
         "Esplora": [
+            st.Page("pages/8_Scheda_Paese.py", title="Scheda Paese", icon="🔎"),
             st.Page("pages/3_Cinque_Strategie_Nazionali.py", title="Strategie a confronto", icon="🆚"),
             st.Page("pages/6_Mappa_Europa_Mondo.py", title="Mappa Europa/Mondo", icon="🗺️"),
-            st.Page("pages/8_Scheda_Paese.py", title="Scheda Paese", icon="🔎"),
         ],
         "Storia": [
             st.Page("pages/4_Chi_Sostituisce_Chi.py", title="Chi sostituisce chi", icon="🔀"),
