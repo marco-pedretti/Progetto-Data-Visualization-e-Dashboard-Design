@@ -18,13 +18,14 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-from common import NUCLEAR_EVENTS, PALETTE, SOURCE_NOTE, get_nuclear_history
+from common import NUCLEAR_EVENTS, PALETTE, SOURCE_NOTE, get_nuclear_history, limit_page_width
 
 NUCLEAR_COUNTRIES = list(NUCLEAR_EVENTS.keys())
 POSITIONS = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
 
 
 def main() -> None:
+    limit_page_width()
     st.title("☢️ Declino del nucleare: picco, evento, crollo")
     st.markdown(
         "La pagina **Chi sostituisce chi** isola un piccolo gruppo di paesi dove il calo del "

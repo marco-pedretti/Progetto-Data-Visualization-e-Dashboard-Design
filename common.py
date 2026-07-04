@@ -60,14 +60,15 @@ WORLD_YEAR_START = 2000
 WORLD_YEAR_END = 2024
 
 # Metriche disponibili per la mappa (solo settore elettrico, non emissioni economy-wide):
-# scala colore a tinta unica coerente con PALETTE per le tre fonti, RdYlGn_r per l'intensità
-# di carbonio (stesso schema del prezzo Airbnb in altri_file: rosso = peggio, verde = meglio),
-# Blues per la generazione totale (grandezza neutra, nessun giudizio di valore).
+# scala colore a tinta unica coerente con PALETTE per le tre fonti, YlOrRd per l'intensità
+# di carbonio (sequenziale: più scuro = più emissioni — NON RdYlGn_r come il prezzo Airbnb
+# in altri_file: rosso-verde è il caso classico di daltonismo e contraddirebbe la scelta
+# Okabe-Ito dichiarata in Home), Blues per la generazione totale (grandezza neutra).
 MAP_METRICS = {
     "Quota fossile (%)": {"col": "fossil_share_elec", "colorscale": "Greys"},
     "Quota nucleare (%)": {"col": "nuclear_share_elec", "colorscale": "Oranges"},
     "Quota rinnovabili (%)": {"col": "renewables_share_elec", "colorscale": "Greens"},
-    "Intensità di carbonio (gCO2/kWh)": {"col": "carbon_intensity_elec", "colorscale": "RdYlGn_r"},
+    "Intensità di carbonio (gCO2/kWh)": {"col": "carbon_intensity_elec", "colorscale": "YlOrRd"},
     "Generazione totale (TWh)": {"col": "electricity_generation", "colorscale": "Blues"},
 }
 
@@ -195,4 +196,27 @@ def get_scope_kpis(df_year: pd.DataFrame) -> dict:
         total_generation=df_year["electricity_generation"].sum(),
         carbon_intensity=carbon_intensity,
         **shares,
+    )
+
+
+def limit_page_width(max_px: int = 1200) -> None:
+    """Limita la larghezza del contenuto della pagina corrente, centrando il blocco principale.
+
+    Il layout "wide" è impostato globalmente in streamlit_app.py, ma su monitor larghi stira
+    eccessivamente testo e grafici; questo helper applica un max-width via CSS scoped alla
+    pagina che lo chiama (lo stile iniettato da st.markdown sparisce navigando altrove, perché
+    ogni pagina multipage è uno script eseguito da zero). Il selettore data-testid dipende
+    dai nomi interni di Streamlit — per questo la versione è pinnata in requirements.txt.
+    """
+    st.markdown(
+        f"""
+        <style>
+        [data-testid="stMainBlockContainer"] {{
+            max-width: {max_px}px;
+            margin-left: auto;
+            margin-right: auto;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
     )

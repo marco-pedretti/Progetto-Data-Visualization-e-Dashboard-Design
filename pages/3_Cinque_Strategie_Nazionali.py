@@ -14,7 +14,7 @@ pagine Esplora.
 import plotly.express as px
 import streamlit as st
 
-from common import PALETTE, PROFILE_COUNTRIES, SOURCE_NOTE, get_balanced_panel
+from common import PALETTE, PROFILE_COUNTRIES, SOURCE_NOTE, get_balanced_panel, limit_page_width
 
 SOURCES = [("Fossile", "fossil_share_elec", "fossile"), ("Nucleare", "nuclear_share_elec", "nucleare"), ("Rinnovabili", "renewables_share_elec", "rinnovabili")]
 COLOR_MAP = {label: PALETTE[key] for label, _, key in SOURCES}
@@ -36,6 +36,9 @@ def profile_controls() -> list[str]:
 
 
 def main() -> None:
+    # Pagine Storia: molto testo — su monitor larghi righe più corte leggono meglio (stessa
+    # larghezza massima già usata da Mappa e Scheda Paese, per coerenza tra pagine).
+    limit_page_width()
     st.title("🗺️ Cinque strategie nazionali")
     st.markdown(
         "La media europea nasconde traiettorie molto diverse. I cinque profili di default "

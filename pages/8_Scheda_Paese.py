@@ -24,7 +24,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import EUROPE_ISO, PALETTE, SOURCE_NOTE, load_raw_data
+from common import EUROPE_ISO, PALETTE, SOURCE_NOTE, limit_page_width, load_raw_data
 
 SIMPLE_TWH = [("Fossile", "fossil_electricity"), ("Nucleare", "nuclear_electricity"), ("Rinnovabili", "renewables_electricity")]
 DETAILED_TWH = [
@@ -237,6 +237,12 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, col: str, label: str, unit: s
     return fig
 
 
+# Unità "di grandezza" (non normalizzate): per queste il rank tra paesi misura soprattutto la
+# dimensione del paese, non una performance — va detto accanto al percentile, stessa logica delle
+# note di contesto sulle metriche di ranking (Cap. 4.11 del notebook).
+ABSOLUTE_UNITS = {"TWh", "TWh eq.", "persone", "international-$", "Mt CO₂eq"}
+
+
 def percentile_block(entity: str, iso_code: str | None, col: str, label: str, unit: str, d_idx: pd.DataFrame) -> None:
     if iso_code is None:
         st.info(f'"{entity}" è un aggregato (non un singolo paese): confrontarlo con i paesi non è comparabile su questa base.')
@@ -267,6 +273,13 @@ def percentile_block(entity: str, iso_code: str | None, col: str, label: str, un
         fig.update_layout(height=280, title=f"Distribuzione tra {n} paesi — {label} ({year})", showlegend=False, yaxis_title="Numero di paesi")
         st.plotly_chart(fig, width="stretch")
 
+    if unit in ABSOLUTE_UNITS:
+        st.caption(
+            "⚠️ Metrica in valore assoluto: il rank riflette anche la dimensione del paese, non solo "
+            "una performance. Per un confronto a parità di dimensione usa le quote (%) o le metriche "
+            "pro-capite."
+        )
+
 
 def sidebar_controls() -> dict:
     with st.sidebar:
@@ -280,23 +293,7 @@ def sidebar_controls() -> dict:
 
 
 def main() -> None:
-    # Il layout "wide" dell'app (impostato globalmente in streamlit_app.py) fa occupare al
-    # contenuto tutta la larghezza dello schermo: utile per la mappa, ma su monitor larghi
-    # allarga eccessivamente anche testo e grafici a due colonne rovinando l'estetica. Si
-    # limita la larghezza massima solo su questa pagina, centrando il contenuto (stessa
-    # soluzione già applicata alla pagina Mappa).
-    st.markdown(
-        """
-        <style>
-        [data-testid="stMainBlockContainer"] {
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+    limit_page_width()
     st.title("🔎 Scheda Paese")
     st.markdown(
         "Scegli un'entità qualunque in sidebar — non è vincolata al panel bilanciato usato nel "

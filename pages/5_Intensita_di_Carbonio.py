@@ -19,13 +19,14 @@ metriche sono correlate ma non intercambiabili.
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import PALETTE, SOURCE_NOTE, get_balanced_panel, get_carbon_intensity
+from common import PALETTE, SOURCE_NOTE, get_balanced_panel, get_carbon_intensity, limit_page_width
 
 bal_all, complete_countries, _ = get_balanced_panel()
 carbon = get_carbon_intensity()
 
 
 def main() -> None:
+    limit_page_width()
     st.title("🌍 Intensità di carbonio")
     st.markdown(
         "Le quote di mix rispondono alla domanda \"di cosa è fatta l'elettricità\", ma nucleare e "
