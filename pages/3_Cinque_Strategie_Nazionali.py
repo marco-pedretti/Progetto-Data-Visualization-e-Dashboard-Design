@@ -40,6 +40,16 @@ from common import (
 # grigio fossile) — qui il colore = il paese.
 COUNTRY_COLORS = ("#0072B2", "#D55E00", "#CC79A7", "#56B4E9")
 
+# Layout adattivo: le sezioni "a colonne" (scoreboard, mix) crescono col numero di paesi tenendo
+# ogni colonna larga almeno COL_PX invece di comprimerla; le sezioni di confronto comune (linee
+# sovrapposte) restano fisse a UNIFIED_PX a prescindere da quanti paesi si confrontano.
+# UNIFIED_PX va tenuto ≤ area utile della pagina al minimo (PAGE_MIN meno il padding di Streamlit,
+# ~160px): altrimenti a 2 paesi il wrapper non raggiunge il suo max-width e le sezioni comuni
+# risulterebbero più strette che a 4 (verificato via browser headless).
+COL_PX = 500
+PAGE_MIN = 1100
+UNIFIED_PX = 930
+
 # Scoreboard: (etichetta, colonna, unità, verso "buono"). delta_color="inverse" dove un calo
 # è un miglioramento (fossile, intensità di carbonio), "normal" dove lo è una crescita.
 KPI = [
@@ -143,7 +153,13 @@ def europe_reference(col: str, years) -> "tuple | None":
 
 
 def main() -> None:
-    limit_page_width()
+    limit_page_width(PAGE_MIN)  # cap iniziale; sotto viene riadattato al numero di paesi scelti
+    # Le sezioni di confronto comune (wrapper con chiave "fw_…") restano larghe UNIFIED_PX e centrate
+    # anche quando la pagina si allarga per fare spazio a più colonne-paese.
+    st.markdown(
+        f'<style>div[class*="st-key-fw_"]{{max-width:{UNIFIED_PX}px;margin-left:auto;margin-right:auto;}}</style>',
+        unsafe_allow_html=True,
+    )
     st.title("🆚 Strategie nazionali a confronto")
     st.markdown(
         "La media europea nasconde traiettorie opposte: chi ha puntato sul nucleare, chi sulle "
@@ -177,10 +193,14 @@ def main() -> None:
         for i, c in enumerate(selected)
     ]
 
+    # La pagina si allarga con il numero di paesi, così le colonne non scendono sotto COL_PX; le
+    # sezioni di confronto comune restano comunque a UNIFIED_PX grazie al wrapper "fw_…".
+    limit_page_width(max(PAGE_MIN, len(series) * COL_PX))
+
     # --- Scoreboard: una colonna per paese ---
     st.subheader("Scheda sintetica")
     st.caption("Valore al 2022 e variazione dal primo anno disponibile (di norma il 1990). Freccia verde = miglioramento.")
-    for (country, d_c, _), col in zip(series, st.columns(len(series))):
+    for (country, d_c, _), col in zip(series, st.columns(len(series), border=True)):
         with col:
             render_scoreboard(country, d_c.set_index("year"))
 
@@ -192,118 +212,120 @@ def main() -> None:
         "Come rappresentare il mix", ["Quota (%)", "Composizione (TWh)"], horizontal=True,
         help="La quota (%) rende i paesi direttamente confrontabili; i TWh mostrano anche il divario di dimensione.",
     )
-    for (country, d_c, _), col in zip(series, st.columns(len(series))):
+    for (country, d_c, _), col in zip(series, st.columns(len(series), border=True)):
         with col:
             st.plotly_chart(mix_figure(d_c, country, mode), width="stretch")
     st.caption(f"{SOURCE_NOTE} — quote fossile/nucleare/rinnovabili, 1990–2022")
 
     st.divider()
 
-    # --- Confronto diretto su una metrica: sezione unificata, una linea per paese ---
-    st.subheader("Confronto diretto")
-    st.markdown(
-        "Qui i paesi selezionati stanno **sullo stesso grafico**: scegli una metrica e confronta le "
-        "traiettorie direttamente. Utile soprattutto per gli esiti (intensità di carbonio) e le "
-        "quote, dove la distanza tra le linee *è* il confronto."
-    )
-    metric_label = st.selectbox("Metrica da confrontare", list(COMPARE_METRICS.keys()))
-    col, unit, is_pct, is_abs = COMPARE_METRICS[metric_label]
+    # --- Confronto diretto su una metrica: sezione unificata (larghezza fissa UNIFIED_PX) ---
+    with st.container(key="fw_confronto"):
+        st.subheader("Confronto diretto")
+        st.markdown(
+            "Qui i paesi selezionati stanno **sullo stesso grafico**: scegli una metrica e confronta le "
+            "traiettorie direttamente. Utile soprattutto per gli esiti (intensità di carbonio) e le "
+            "quote, dove la distanza tra le linee *è* il confronto."
+        )
+        metric_label = st.selectbox("Metrica da confrontare", list(COMPARE_METRICS.keys()))
+        col, unit, is_pct, is_abs = COMPARE_METRICS[metric_label]
 
-    show_europe = False
-    if not is_abs:
-        show_europe = st.checkbox("Aggiungi la media europea come riferimento", value=False)
+        show_europe = False
+        if not is_abs:
+            show_europe = st.checkbox("Aggiungi la media europea come riferimento", value=False)
 
-    fig = go.Figure()
-    finals = {}
-    for country, d_c, color in series:
-        s = d_c.set_index("year")[col].dropna() if col in d_c.columns else None
-        if s is None or s.empty:
-            continue
-        finals[country] = int(s.index.max())
-        fig.add_trace(go.Scatter(x=s.index, y=s.values, name=country, line=dict(color=color, width=2.8)))
-
-    if show_europe:
-        ref = europe_reference(col, series[0][1]["year"].unique())
-        if ref is not None:
-            fig.add_trace(go.Scatter(x=ref[0], y=ref[1], name="Europa (OWID)", line=dict(color="#888888", width=1.5, dash="dash")))
-
-    fig.update_layout(
-        title=metric_label, yaxis_title=unit, template="plotly_white", height=460,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
-    )
-    if is_pct:
-        fig.update_yaxes(range=[0, 100])
-    else:
-        fig.update_yaxes(rangemode="tozero")
-    st.plotly_chart(fig, width="stretch")
-
-    note = f"{SOURCE_NOTE} — panel bilanciato, 1990–2022"
-    if is_abs:
-        note += " · ⚠️ valore assoluto: riflette anche la dimensione del paese, non solo la strategia"
-    st.caption(note)
-
-    # Lettura dinamica sull'ultimo anno in comune a tutti i paesi con questa metrica: più alto vs
-    # più basso (il "divario A-B" del testa-a-testa non si generalizza a 3-4 paesi).
-    if len(finals) >= 2:
-        year = min(finals.values())
-        vals = {}
-        for country, d_c, _ in series:
+        fig = go.Figure()
+        finals = {}
+        for country, d_c, color in series:
             s = d_c.set_index("year")[col].dropna() if col in d_c.columns else None
-            if s is not None and year in s.index:
-                vals[country] = float(s[year])
-        if len(vals) >= 2:
-            hi = max(vals, key=vals.get)
-            lo = min(vals, key=vals.get)
-            parts = " · ".join(f"**{c}** {v:.1f}" for c, v in vals.items())
-            st.markdown(
-                f"Nel **{year}**, {metric_label.split(' (')[0].lower()} ({unit}): {parts}. "
-                f"Più alto **{hi}**, più basso **{lo}** — divario {vals[hi] - vals[lo]:.1f} {unit}."
-            )
+            if s is None or s.empty:
+                continue
+            finals[country] = int(s.index.max())
+            fig.add_trace(go.Scatter(x=s.index, y=s.values, name=country, line=dict(color=color, width=2.8)))
+
+        if show_europe:
+            ref = europe_reference(col, series[0][1]["year"].unique())
+            if ref is not None:
+                fig.add_trace(go.Scatter(x=ref[0], y=ref[1], name="Europa (OWID)", line=dict(color="#888888", width=1.5, dash="dash")))
+
+        fig.update_layout(
+            title=metric_label, yaxis_title=unit, template="plotly_white", height=460,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        )
+        if is_pct:
+            fig.update_yaxes(range=[0, 100])
+        else:
+            fig.update_yaxes(rangemode="tozero")
+        st.plotly_chart(fig, width="stretch")
+
+        note = f"{SOURCE_NOTE} — panel bilanciato, 1990–2022"
+        if is_abs:
+            note += " · ⚠️ valore assoluto: riflette anche la dimensione del paese, non solo la strategia"
+        st.caption(note)
+
+        # Lettura dinamica sull'ultimo anno in comune a tutti i paesi con questa metrica: più alto vs
+        # più basso (il "divario A-B" del testa-a-testa non si generalizza a 3-4 paesi).
+        if len(finals) >= 2:
+            year = min(finals.values())
+            vals = {}
+            for country, d_c, _ in series:
+                s = d_c.set_index("year")[col].dropna() if col in d_c.columns else None
+                if s is not None and year in s.index:
+                    vals[country] = float(s[year])
+            if len(vals) >= 2:
+                hi = max(vals, key=vals.get)
+                lo = min(vals, key=vals.get)
+                parts = " · ".join(f"**{c}** {v:.1f}" for c, v in vals.items())
+                st.markdown(
+                    f"Nel **{year}**, {metric_label.split(' (')[0].lower()} ({unit}): {parts}. "
+                    f"Più alto **{hi}**, più basso **{lo}** — divario {vals[hi] - vals[lo]:.1f} {unit}."
+                )
 
     st.divider()
 
-    # --- Crescita di una fonte nel tempo: assoluto o indicizzato ---
-    st.subheader("Crescita di una fonte nel tempo")
-    g1, g2 = st.columns([2, 3])
-    growth_source = g1.selectbox("Fonte", list(GROWTH_SOURCES.keys()))
-    representation = g2.radio(
-        "Come rappresentarla", ["Indice di crescita (1990 = 100)", "Valore assoluto (TWh)"],
-        horizontal=True,
-        help="L'indice mostra quanto è cresciuta ciascuna fonte rispetto al 1990; il valore assoluto i TWh effettivi.",
-    )
-    gcol = GROWTH_SOURCES[growth_source]
-    as_index = representation.startswith("Indice")
+    # --- Crescita di una fonte nel tempo: sezione unificata (larghezza fissa UNIFIED_PX) ---
+    with st.container(key="fw_crescita"):
+        st.subheader("Crescita di una fonte nel tempo")
+        g1, g2 = st.columns([2, 3])
+        growth_source = g1.selectbox("Fonte", list(GROWTH_SOURCES.keys()))
+        representation = g2.radio(
+            "Come rappresentarla", ["Indice di crescita (1990 = 100)", "Valore assoluto (TWh)"],
+            horizontal=True,
+            help="L'indice mostra quanto è cresciuta ciascuna fonte rispetto al 1990; il valore assoluto i TWh effettivi.",
+        )
+        gcol = GROWTH_SOURCES[growth_source]
+        as_index = representation.startswith("Indice")
 
-    gfig = go.Figure()
-    skipped = []
-    for country, d_c, color in series:
-        s = d_c.set_index("year")[gcol].dropna() if gcol in d_c.columns else None
-        if s is None or s.empty:
-            continue
-        if as_index:
-            base = float(s.iloc[0])
-            if base <= 0:  # fonte assente nel primo anno (es. nucleare in un paese senza): indice non definito
-                skipped.append(country)
+        gfig = go.Figure()
+        skipped = []
+        for country, d_c, color in series:
+            s = d_c.set_index("year")[gcol].dropna() if gcol in d_c.columns else None
+            if s is None or s.empty:
                 continue
-            s = s / base * 100
-        gfig.add_trace(go.Scatter(x=s.index, y=s.values, name=country, line=dict(color=color, width=2.8)))
+            if as_index:
+                base = float(s.iloc[0])
+                if base <= 0:  # fonte assente nel primo anno (es. nucleare in un paese senza): indice non definito
+                    skipped.append(country)
+                    continue
+                s = s / base * 100
+            gfig.add_trace(go.Scatter(x=s.index, y=s.values, name=country, line=dict(color=color, width=2.8)))
 
-    if as_index:
-        gfig.add_hline(y=100, line_dash="dot", line_color="#888888")
-        y_title = "Indice (1990 = 100)"
-    else:
-        y_title = "TWh"
-        gfig.update_yaxes(rangemode="tozero")  # l'indice no: la sua ancora di lettura è 100, non 0
-    gfig.update_layout(
-        title=f"{growth_source} — {'indice di crescita' if as_index else 'valore assoluto (TWh)'}",
-        yaxis_title=y_title, template="plotly_white", height=440,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
-    )
-    st.plotly_chart(gfig, width="stretch")
-    note = SOURCE_NOTE
-    if skipped:
-        note = f"Indice non calcolabile per {', '.join(skipped)} (fonte nulla nel 1990). " + note
-    st.caption(note)
+        if as_index:
+            gfig.add_hline(y=100, line_dash="dot", line_color="#888888")
+            y_title = "Indice (1990 = 100)"
+        else:
+            y_title = "TWh"
+            gfig.update_yaxes(rangemode="tozero")  # l'indice no: la sua ancora di lettura è 100, non 0
+        gfig.update_layout(
+            title=f"{growth_source} — {'indice di crescita' if as_index else 'valore assoluto (TWh)'}",
+            yaxis_title=y_title, template="plotly_white", height=440,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        )
+        st.plotly_chart(gfig, width="stretch")
+        note = SOURCE_NOTE
+        if skipped:
+            note = f"Indice non calcolabile per {', '.join(skipped)} (fonte nulla nel 1990). " + note
+        st.caption(note)
 
 
 if __name__ == "__main__":
