@@ -56,9 +56,9 @@ c2.metric("Fossile", f"{shares['fossile']:.1f}%", help="Quota pesata per generaz
 c3.metric("Nucleare", f"{shares['nucleare']:.1f}%", help="Quota pesata per generazione")
 c4.metric("Rinnovabili", f"{shares['rinnovabili']:.1f}%", help="Quota pesata per generazione")
 
-# --- Mini-grafico d'insieme: stesso calcolo di quota della pagina 1 (Confronto), ---
-# --- solo compatto e senza controlli: qui serve solo a dare il contesto generale ---
-# --- prima che l'utente navighi, non a sostituire la pagina di dettaglio. ---
+# --- Mini-grafico d'insieme sul panel aggregato: compatto e senza controlli, qui serve ---
+# --- solo a dare il contesto generale prima che l'utente navighi, non a sostituire le ---
+# --- pagine di dettaglio (il confronto per paese vive in "Strategie a confronto"). ---
 agg = bal_all.groupby("year")[
     ["electricity_generation", "fossil_electricity", "nuclear_electricity", "renewables_electricity"]
 ].sum()
@@ -112,7 +112,7 @@ with h1:
         f"rapporto è invertito ({share_series['renewables_electricity'].loc[last_year]:.0f}% contro "
         f"{share_series['nuclear_electricity'].loc[last_year]:.0f}%)."
     )
-    st.page_link("pages/1_Composizione_e_Confronto.py", label="Approfondisci →", icon="📊")
+    st.page_link("pages/3_Cinque_Strategie_Nazionali.py", label="Confronta due paesi →", icon="🆚")
 with h2:
     st.markdown(f"**L'intensità di carbonio si è quasi dimezzata dal 1990 al {ci_min_year}**")
     st.caption(
@@ -135,15 +135,14 @@ with h3:
 st.divider()
 st.subheader("Un filo conduttore tra le pagine Storia")
 st.markdown(
-    "Le pagine Storia si leggono in qualunque ordine, ma se cerchi un filo conduttore: casi "
-    "nazionali concreti → lo stesso pattern verificato su tutto il panel → il gruppo eccezione "
-    "approfondito nel tempo → l'indicatore di esito che chiude il quadro."
+    "Le pagine Storia si leggono in qualunque ordine, ma se cerchi un filo conduttore: il pattern "
+    "di sostituzione verificato su tutto il panel → il gruppo eccezione approfondito nel tempo → "
+    "l'indicatore di esito che chiude il quadro."
 )
-r1, r2, r3, r4 = st.columns(4)
-r1.page_link("pages/3_Cinque_Strategie_Nazionali.py", label="1. Cinque strategie nazionali", icon="🧭")
-r2.page_link("pages/4_Chi_Sostituisce_Chi.py", label="2. Chi sostituisce chi", icon="🔀")
-r3.page_link("pages/7_Declino_Nucleare.py", label="3. Declino del nucleare", icon="☢️")
-r4.page_link("pages/5_Intensita_di_Carbonio.py", label="4. Intensità di carbonio", icon="🌍")
+r1, r2, r3 = st.columns(3)
+r1.page_link("pages/4_Chi_Sostituisce_Chi.py", label="1. Chi sostituisce chi", icon="🔀")
+r2.page_link("pages/7_Declino_Nucleare.py", label="2. Declino del nucleare", icon="☢️")
+r3.page_link("pages/5_Intensita_di_Carbonio.py", label="3. Intensità di carbonio", icon="🌍")
 
 st.divider()
 
