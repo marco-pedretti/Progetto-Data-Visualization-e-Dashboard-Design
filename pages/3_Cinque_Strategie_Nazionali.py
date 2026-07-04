@@ -1,16 +1,16 @@
 """
 Pagina 3 — Strategie nazionali a confronto (Esplora)
 =======================================================
-Confronto libero testa-a-testa tra due paesi. Eredita dal vecchio "Cinque strategie
-nazionali" (Cap. 4.3) l'idea che la media europea nasconda traiettorie molto diverse,
-ma la apre a scelta dell'utente: due paesi qualunque del panel bilanciato invece di
-cinque profili fissi. Da qui la ricollocazione tra le pagine Esplora.
+Confronto libero tra due e quattro paesi (default testa-a-testa). Eredita dal vecchio
+"Cinque strategie nazionali" (Cap. 4.3) l'idea che la media europea nasconda traiettorie
+molto diverse, ma la apre a scelta dell'utente: paesi qualunque del panel bilanciato invece
+di cinque profili fissi. Da qui la ricollocazione tra le pagine Esplora.
 
-La pagina alterna due registri:
-- sezioni **in due colonne** (una per paese) per ciò che si legge meglio in parallelo
-  ma non si può sovrapporre: lo scoreboard KPI e la composizione impilata del mix (due
-  stack di paesi diversi non stanno sullo stesso grafico);
-- una sezione **unificata** (due linee sullo stesso asse) per le metriche scalari-per-anno,
+La pagina alterna due registri, e adatta il numero di colonne ai paesi scelti (2–4):
+- sezioni **a colonne** (una per paese) per ciò che si legge meglio in parallelo ma non si
+  può sovrapporre: lo scoreboard KPI e la composizione impilata del mix (stack di paesi
+  diversi non stanno sullo stesso grafico);
+- una sezione **unificata** (una linea per paese sullo stesso asse) per le metriche scalari-per-anno,
   dove la sovrapposizione diretta è proprio il confronto — con un selettore di metrica che
   è la parte di esplorazione libera vera e propria — più la crescita di una fonte nel tempo
   (valore assoluto o indice 1990 = 100, ex pagina "Velocità di crescita" confluita qui: la
@@ -35,9 +35,10 @@ from common import (
     load_raw_data,
 )
 
-# Identità dei due paesi nei grafici unificati: due tinte Okabe-Ito distinte e visibili in
-# dark mode (blu / vermiglio). Non sono i colori delle fonti — qui il colore = il paese.
-COUNTRY_COLORS = ("#0072B2", "#D55E00")
+# Identità dei paesi nei grafici unificati: fino a 4 tinte Okabe-Ito distinte e visibili in
+# dark mode. Non sono i colori delle fonti (niente arancio nucleare / verde rinnovabili /
+# grigio fossile) — qui il colore = il paese.
+COUNTRY_COLORS = ("#0072B2", "#D55E00", "#CC79A7", "#56B4E9")
 
 # Scoreboard: (etichetta, colonna, unità, verso "buono"). delta_color="inverse" dove un calo
 # è un miglioramento (fossile, intensità di carbonio), "normal" dove lo è una crescita.
@@ -146,9 +147,9 @@ def main() -> None:
     st.title("🆚 Strategie nazionali a confronto")
     st.markdown(
         "La media europea nasconde traiettorie opposte: chi ha puntato sul nucleare, chi sulle "
-        "rinnovabili, chi è ancora legato al fossile. Scegli **due paesi** e mettili testa a testa "
-        "— prima i numeri chiave, poi i mix affiancati, infine il confronto diretto su una metrica "
-        "a tua scelta."
+        "rinnovabili, chi è ancora legato al fossile. Scegli **da due a quattro paesi** e mettili "
+        "a confronto — prima i numeri chiave, poi i mix affiancati, poi il confronto diretto su una "
+        "metrica a tua scelta e la crescita di una fonte nel tempo."
     )
 
     with st.expander("⚙️ Opzioni"):
@@ -161,45 +162,47 @@ def main() -> None:
     data = _with_derived(get_extended_panel(EXTRA_COUNTRIES if include_extra else []))
     options = sorted(data["country"].unique())
 
-    c1, c2 = st.columns(2)
-    country_a = c1.selectbox("Paese A", options, index=options.index("France"))
-    country_b = c2.selectbox("Paese B", options, index=options.index("Germany"))
-    if country_a == country_b:
-        st.warning("⚠️ Hai scelto lo stesso paese in entrambi gli slot: il confronto sarà con sé stesso.")
+    selected = st.multiselect(
+        "Paesi da confrontare (da 2 a 4)", options, default=["France", "Germany"],
+        max_selections=4,
+        help="Il caso base è il testa-a-testa; puoi aggiungere fino a 4 paesi — la pagina adatta le colonne.",
+    )
+    if len(selected) < 2:
+        st.info("Seleziona almeno due paesi per confrontarli.")
+        st.stop()
 
-    da = data[data["country"] == country_a].sort_values("year")
-    db = data[data["country"] == country_b].sort_values("year")
+    # (paese, dati, colore) in ordine di selezione: il colore identifica il paese in tutta la pagina.
+    series = [
+        (c, data[data["country"] == c].sort_values("year"), COUNTRY_COLORS[i])
+        for i, c in enumerate(selected)
+    ]
 
-    # --- Scoreboard: due colonne, una per paese ---
+    # --- Scoreboard: una colonna per paese ---
     st.subheader("Scheda sintetica")
     st.caption("Valore al 2022 e variazione dal primo anno disponibile (di norma il 1990). Freccia verde = miglioramento.")
-    col_a, col_b = st.columns(2)
-    with col_a:
-        render_scoreboard(country_a, da.set_index("year"))
-    with col_b:
-        render_scoreboard(country_b, db.set_index("year"))
+    for (country, d_c, _), col in zip(series, st.columns(len(series))):
+        with col:
+            render_scoreboard(country, d_c.set_index("year"))
 
     st.divider()
 
-    # --- Composizione del mix: due colonne, una per paese, stessa scala ---
+    # --- Composizione del mix: una colonna per paese, stessa scala ---
     st.subheader("Composizione del mix elettrico")
     mode = st.radio(
         "Come rappresentare il mix", ["Quota (%)", "Composizione (TWh)"], horizontal=True,
-        help="La quota (%) rende i due paesi direttamente confrontabili; i TWh mostrano anche il divario di dimensione.",
+        help="La quota (%) rende i paesi direttamente confrontabili; i TWh mostrano anche il divario di dimensione.",
     )
-    mcol_a, mcol_b = st.columns(2)
-    with mcol_a:
-        st.plotly_chart(mix_figure(da, country_a, mode), width="stretch")
-    with mcol_b:
-        st.plotly_chart(mix_figure(db, country_b, mode), width="stretch")
+    for (country, d_c, _), col in zip(series, st.columns(len(series))):
+        with col:
+            st.plotly_chart(mix_figure(d_c, country, mode), width="stretch")
     st.caption(f"{SOURCE_NOTE} — quote fossile/nucleare/rinnovabili, 1990–2022")
 
     st.divider()
 
-    # --- Confronto diretto su una metrica: sezione unificata, due linee ---
+    # --- Confronto diretto su una metrica: sezione unificata, una linea per paese ---
     st.subheader("Confronto diretto")
     st.markdown(
-        "Qui i due paesi stanno **sullo stesso grafico**: scegli una metrica e confronta le due "
+        "Qui i paesi selezionati stanno **sullo stesso grafico**: scegli una metrica e confronta le "
         "traiettorie direttamente. Utile soprattutto per gli esiti (intensità di carbonio) e le "
         "quote, dove la distanza tra le linee *è* il confronto."
     )
@@ -212,15 +215,15 @@ def main() -> None:
 
     fig = go.Figure()
     finals = {}
-    for country, d_c, color in [(country_a, da, COUNTRY_COLORS[0]), (country_b, db, COUNTRY_COLORS[1])]:
+    for country, d_c, color in series:
         s = d_c.set_index("year")[col].dropna() if col in d_c.columns else None
         if s is None or s.empty:
             continue
-        finals[country] = (int(s.index.max()), float(s.iloc[-1]))
+        finals[country] = int(s.index.max())
         fig.add_trace(go.Scatter(x=s.index, y=s.values, name=country, line=dict(color=color, width=2.8)))
 
     if show_europe:
-        ref = europe_reference(col, da["year"].unique())
+        ref = europe_reference(col, series[0][1]["year"].unique())
         if ref is not None:
             fig.add_trace(go.Scatter(x=ref[0], y=ref[1], name="Europa (OWID)", line=dict(color="#888888", width=1.5, dash="dash")))
 
@@ -239,22 +242,22 @@ def main() -> None:
         note += " · ⚠️ valore assoluto: riflette anche la dimensione del paese, non solo la strategia"
     st.caption(note)
 
-    # Piccola lettura dinamica del confronto sull'ultimo anno in comune.
-    if country_a in finals and country_b in finals:
-        ya, va = finals[country_a]
-        yb, vb = finals[country_b]
-        year = min(ya, yb)
-        sa = da.set_index("year")[col].dropna()
-        sb = db.set_index("year")[col].dropna()
-        if year in sa.index and year in sb.index:
-            va, vb = float(sa[year]), float(sb[year])
-            higher, lower = (country_a, country_b) if va >= vb else (country_b, country_a)
-            hv, lv = (va, vb) if va >= vb else (vb, va)
-            gap = hv - lv
-            ratio = f" ({hv / lv:.1f}× )" if lv > 0 else ""
+    # Lettura dinamica sull'ultimo anno in comune a tutti i paesi con questa metrica: più alto vs
+    # più basso (il "divario A-B" del testa-a-testa non si generalizza a 3-4 paesi).
+    if len(finals) >= 2:
+        year = min(finals.values())
+        vals = {}
+        for country, d_c, _ in series:
+            s = d_c.set_index("year")[col].dropna() if col in d_c.columns else None
+            if s is not None and year in s.index:
+                vals[country] = float(s[year])
+        if len(vals) >= 2:
+            hi = max(vals, key=vals.get)
+            lo = min(vals, key=vals.get)
+            parts = " · ".join(f"**{c}** {v:.1f}" for c, v in vals.items())
             st.markdown(
-                f"Nel **{year}**, {metric_label.split(' (')[0].lower()}: **{country_a}** {va:.1f} {unit} · "
-                f"**{country_b}** {vb:.1f} {unit}. Divario: **{higher}** più alto di {gap:.1f} {unit}{ratio}."
+                f"Nel **{year}**, {metric_label.split(' (')[0].lower()} ({unit}): {parts}. "
+                f"Più alto **{hi}**, più basso **{lo}** — divario {vals[hi] - vals[lo]:.1f} {unit}."
             )
 
     st.divider()
@@ -273,7 +276,7 @@ def main() -> None:
 
     gfig = go.Figure()
     skipped = []
-    for country, d_c, color in [(country_a, da, COUNTRY_COLORS[0]), (country_b, db, COUNTRY_COLORS[1])]:
+    for country, d_c, color in series:
         s = d_c.set_index("year")[gcol].dropna() if gcol in d_c.columns else None
         if s is None or s.empty:
             continue
