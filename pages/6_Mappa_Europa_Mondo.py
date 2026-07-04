@@ -55,6 +55,12 @@ def main() -> None:
     kpis = get_scope_kpis(df_year)
     n_with_metric = int(df_year[metric["col"]].notna().sum())
 
+    # Scala colore fissata sul range della metrica nell'intero ambito (tutti gli anni), non sul
+    # solo anno selezionato: altrimenti muovendo lo slider la legenda si ricalibra ogni volta e i
+    # colori non sono più confrontabili anno per anno.
+    color_min = scope_df[metric["col"]].min()
+    color_max = scope_df[metric["col"]].max()
+
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric(f"Paesi in {f['scope']}", f"{kpis['n_countries']}")
     c2.metric("Con dato per la metrica", f"{n_with_metric}")
@@ -68,6 +74,7 @@ def main() -> None:
     fig = px.choropleth(
         df_year, locations="iso_code", color=metric["col"], hover_name="country",
         color_continuous_scale=metric["colorscale"],
+        range_color=(color_min, color_max),
         scope="europe" if f["scope"] == "Europa" else "world",
         labels={metric["col"]: f["metric_label"]},
         title=f"{f['metric_label']} — {year}",
