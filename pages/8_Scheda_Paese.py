@@ -233,6 +233,7 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, col: str, label: str, unit: s
         title=f"{title} — {entity}", yaxis_title=y_title, template="plotly_white",
         height=440, legend=dict(orientation="h", yanchor="bottom", y=1.02),
     )
+    fig.update_yaxes(rangemode="tozero")
     return fig
 
 
@@ -340,6 +341,7 @@ def main() -> None:
             if not pop_series.empty:
                 fig = px.line(pop_series.reset_index(), x="year", y="population", labels={"year": "", "population": "Popolazione"}, template="plotly_white")
                 fig.update_layout(height=320, title="Popolazione")
+                fig.update_yaxes(rangemode="tozero")
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di popolazione per questa entità.")
@@ -348,6 +350,7 @@ def main() -> None:
             if not pc_series.empty:
                 fig = px.line(pc_series.reset_index(), x="year", y="per_capita_electricity", labels={"year": "", "per_capita_electricity": "kWh/persona"}, template="plotly_white")
                 fig.update_layout(height=320, title="Generazione elettrica pro-capite")
+                fig.update_yaxes(rangemode="tozero")
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di generazione pro-capite per questa entità.")
@@ -402,6 +405,7 @@ def main() -> None:
                     labels={"year": "", value_name: "TWh", "fonte": ""},
                     title=f"Composizione del mix elettrico — {entity}", template="plotly_white",
                 )
+                fig.update_yaxes(rangemode="tozero")
             else:
                 fig = px.line(
                     long_d, x="year", y=value_name, color="fonte",
@@ -440,6 +444,7 @@ def main() -> None:
                     labels={"year": "", value_name: "TWh", "fonte": ""},
                     title=f"Composizione dell'energia primaria — {entity}", template="plotly_white",
                 )
+                fig.update_yaxes(rangemode="tozero")
             else:
                 fig = px.line(
                     long_d, x="year", y=value_name, color="fonte",
@@ -466,6 +471,7 @@ def main() -> None:
                     long_prod, x="year", y="TWh eq.", color="fonte", color_discrete_map=SOURCE_COLORS,
                     labels={"year": ""}, title="Produzione di fonti fossili (estrazione)", template="plotly_white",
                 )
+                fig.update_yaxes(rangemode="tozero")
                 fig.update_layout(height=340)
                 st.plotly_chart(fig, width="stretch")
             else:
@@ -475,6 +481,7 @@ def main() -> None:
             if not energy_pc.empty:
                 fig = px.line(energy_pc.reset_index(), x="year", y="energy_per_capita", labels={"year": "", "energy_per_capita": "kWh/persona"}, template="plotly_white")
                 fig.update_layout(height=340, title="Consumo energetico pro-capite (tutte le fonti)")
+                fig.update_yaxes(rangemode="tozero")
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di consumo energetico pro-capite per questa entità.")
@@ -492,6 +499,7 @@ def main() -> None:
                 if not ref_series.empty:
                     fig.add_trace(go.Scatter(x=ref_series.index, y=ref_series.values, name=f'"{ref}" (OWID)', line=dict(width=1, dash="dash")))
             fig.update_layout(title="Intensità di carbonio elettrica", yaxis_title="gCO₂eq/kWh", template="plotly_white", height=420, legend=dict(orientation="h", yanchor="bottom", y=1.02))
+            fig.update_yaxes(rangemode="tozero")
             st.plotly_chart(fig, width="stretch")
         else:
             st.info("Nessun dato di intensità di carbonio per questa entità.")
@@ -503,6 +511,7 @@ def main() -> None:
                 fig = px.bar(ghg_series.reset_index(), x="year", y="greenhouse_gas_emissions", labels={"year": "", "greenhouse_gas_emissions": "Mt CO₂eq"}, template="plotly_white")
                 fig.update_traces(marker_color=PALETTE["calo"])
                 fig.update_layout(height=320, title="Emissioni del settore elettrico")
+                fig.update_yaxes(rangemode="tozero")
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di emissioni per questa entità.")
@@ -511,6 +520,7 @@ def main() -> None:
             if not egdp_series.empty:
                 fig = px.line(egdp_series.reset_index(), x="year", y="energy_per_gdp", labels={"year": "", "energy_per_gdp": "kWh per $ di PIL"}, template="plotly_white")
                 fig.update_layout(height=320, title="Energia per unità di PIL (efficienza economica)")
+                fig.update_yaxes(rangemode="tozero")
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di energia per unità di PIL per questa entità.")
@@ -521,6 +531,7 @@ def main() -> None:
             if not share_energy.empty:
                 fig = px.line(share_energy.reset_index(), x="year", y="electricity_share_energy", labels={"year": "", "electricity_share_energy": "% del consumo energetico"}, template="plotly_white")
                 fig.update_layout(height=320, title="Quota elettrica sul consumo energetico totale")
+                fig.update_yaxes(range=[0, 100])
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di quota elettrica sul consumo energetico per questa entità.")

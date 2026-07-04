@@ -65,6 +65,7 @@ def main() -> None:
         yaxis_title="gCO₂eq / kWh", template="plotly_white", height=520,
         legend=dict(orientation="h", yanchor="bottom", y=1.02),
     )
+    fig.update_yaxes(rangemode="tozero")
     st.plotly_chart(fig, width="stretch")
     st.caption(f"{SOURCE_NOTE} — panel bilanciato, righe con carbon_intensity_elec valido")
 
@@ -123,6 +124,8 @@ def main() -> None:
         xaxis_title="Quota fossile (%)", yaxis_title="Intensità di carbonio (gCO₂/kWh)",
         template="plotly_white", height=480,
     )
+    fig2.update_xaxes(range=[0, 100])
+    fig2.update_yaxes(rangemode="tozero")
     st.plotly_chart(fig2, width="stretch")
     st.caption(f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, {last_year}")
 

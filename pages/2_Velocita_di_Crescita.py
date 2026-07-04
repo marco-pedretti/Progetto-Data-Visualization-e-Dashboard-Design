@@ -100,6 +100,7 @@ def main() -> None:
             title=f"{f['source_label']} — valore assoluto (TWh)",
             template="plotly_white",
         )
+        fig.update_yaxes(rangemode="tozero")
         fig.update_layout(height=460)
         st.plotly_chart(fig, width="stretch")
 

@@ -108,6 +108,7 @@ def main() -> None:
             title="Composizione assoluta del mix elettrico (TWh)",
             template="plotly_white",
         )
+        fig.update_yaxes(rangemode="tozero")
         fig.update_layout(height=520)
         st.plotly_chart(fig, width="stretch")
     else:
