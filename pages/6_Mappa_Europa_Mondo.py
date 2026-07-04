@@ -57,11 +57,20 @@ def main() -> None:
     # (lo stesso già usato da Streamlit per la parte "non selezionata"), lasciando il pallino con
     # l'etichetta dell'anno come unico indicatore del valore puntuale. Stile applicato solo in
     # questa pagina: le altre pagine usano slider a due estremi dove il tratto colorato è corretto.
+    # Il layout "wide" dell'app (impostato globalmente in streamlit_app.py) fa occupare al
+    # contenuto tutta la larghezza dello schermo: utile per la mappa, ma su monitor larghi
+    # allarga eccessivamente anche testo, KPI e slider rovinando l'estetica. Si limita la
+    # larghezza massima solo su questa pagina, centrando il contenuto.
     st.markdown(
         """
         <style>
         div[data-baseweb="slider"] > div > div > div:nth-child(2) {
             background: rgba(151, 166, 195, 0.25) !important;
+        }
+        [data-testid="stMainBlockContainer"] {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
         </style>
         """,
