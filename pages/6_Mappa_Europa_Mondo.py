@@ -16,6 +16,8 @@ Periodo limitato al 2000-2024 (Cap. 3.2/3.3): prima del 2000 pochissimi paesi
 fuori Europa hanno dati, il 2025 è pesantemente right-censored.
 """
 
+import time
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -49,7 +51,50 @@ def main() -> None:
     metric = MAP_METRICS[f["metric_label"]]
     scope_df = world[world["iso_code"].isin(EUROPE_ISO)] if f["scope"] == "Europa" else world
 
-    year = st.slider("Anno", min_value=WORLD_YEAR_START, max_value=WORLD_YEAR_END, value=2022)
+    # Lo slider seleziona un anno singolo, non un intervallo: Streamlit colora di default il
+    # tratto a sinistra del cursore come se fosse un range selezionato, il che genera l'illusione
+    # segnalata di una selezione multipla. Si uniforma l'intera barra allo stesso grigio neutro
+    # (lo stesso già usato da Streamlit per la parte "non selezionata"), lasciando il pallino con
+    # l'etichetta dell'anno come unico indicatore del valore puntuale. Stile applicato solo in
+    # questa pagina: le altre pagine usano slider a due estremi dove il tratto colorato è corretto.
+    st.markdown(
+        """
+        <style>
+        div[data-baseweb="slider"] > div > div > div:nth-child(2) {
+            background: rgba(151, 166, 195, 0.25) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.session_state.setdefault("map_anim_year", 2022)
+    st.session_state.setdefault("map_playing", False)
+    st.session_state.setdefault("map_advance_pending", False)
+
+    # Il valore di un widget con "key" non è modificabile dopo che il widget è stato istanziato
+    # in quello stesso run (StreamlitAPIException). Per avanzare l'anno lo si fa qui, prima di
+    # creare lo slider, sulla base del flag impostato dal run precedente.
+    if st.session_state.map_playing and st.session_state.map_advance_pending:
+        st.session_state.map_advance_pending = False
+        current = st.session_state.map_anim_year
+        st.session_state.map_anim_year = current + 1 if current < WORLD_YEAR_END else WORLD_YEAR_START
+
+    # Lo slider va istanziato PRIMA dei pulsanti nell'ordine di esecuzione (il layout a colonne
+    # resta invariato: la posizione visiva dipende dall'ordine delle colonne, non da quello del
+    # codice). Se un bottone chiama st.rerun() prima che lo slider sia stato creato in quel run,
+    # Streamlit considera il suo stato "non visto" in quel passaggio e lo elimina, facendolo
+    # ripartire dal default al giro successivo (bug osservato: Stop riportava l'anno a 2022).
+    col_play, col_stop, col_slider = st.columns([1, 1, 6])
+    with col_slider:
+        year = st.slider("Anno", min_value=WORLD_YEAR_START, max_value=WORLD_YEAR_END, key="map_anim_year")
+    with col_play:
+        if st.button("▶️ Play", disabled=st.session_state.map_playing, width="stretch"):
+            st.session_state.map_playing = True
+            st.rerun()
+    with col_stop:
+        if st.button("⏹️ Stop", disabled=not st.session_state.map_playing, width="stretch"):
+            st.session_state.map_playing = False
+            st.rerun()
     df_year = scope_df[scope_df["year"] == year]
 
     kpis = get_scope_kpis(df_year)
@@ -83,6 +128,14 @@ def main() -> None:
     fig.update_layout(height=600, margin=dict(l=0, r=0, t=40, b=0))
     st.plotly_chart(fig, width="stretch")
     st.caption(SOURCE_NOTE)
+
+    # Animazione: ogni rerun mostra un anno, aspetta, poi segnala al run successivo di avanzare
+    # (torna a inizio dopo l'ultimo). Un click su "Stop" interrompe lo script a metà sleep e
+    # riparte con playing=False, quindi il pulsante resta reattivo anche durante la riproduzione.
+    if st.session_state.map_playing:
+        time.sleep(0.7)
+        st.session_state.map_advance_pending = True
+        st.rerun()
 
 
 if __name__ == "__main__":
