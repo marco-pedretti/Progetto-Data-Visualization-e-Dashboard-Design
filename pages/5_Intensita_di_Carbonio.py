@@ -48,7 +48,7 @@ def main() -> None:
     ))
     fig.add_trace(go.Scatter(
         x=carbon.index, y=carbon["europe_owid"], name='Aggregato "Europe" (OWID, validazione)',
-        line=dict(color="black", width=1, dash="dash"),
+        line=dict(color="#888888", width=1, dash="dash"),
     ))
     if country:
         country_series = bal_all[bal_all["country"] == country].set_index("year")["carbon_intensity_elec"]

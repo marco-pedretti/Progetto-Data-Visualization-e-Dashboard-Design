@@ -55,9 +55,11 @@ DETAILED_ENERGY_SHARE = [
 # Okabe-Ito, colorblind-safe: 8 tinte usate una sola volta ciascuna sul set fossile
 # dettagliato (carbone/gas/petrolio) + quello già esistente per l'elettricità. Il grigio è
 # riusato tra "Fossile" aggregato e "Altre rinnovabili" perché non compaiono mai insieme
-# nello stesso grafico (sono alternative dello stesso radio "Semplice/Dettagliato").
+# nello stesso grafico (sono alternative dello stesso radio "Semplice/Dettagliato"). Niente
+# nero puro per il carbone: Streamlit ridisegna Plotly con sfondo scuro in dark mode e il
+# nero vi sparisce del tutto — grigio scuro invece, visibile su entrambi i temi.
 SOURCE_COLORS = {
-    "Fossile": "#999999", "Carbone": "#000000", "Gas": "#F0E442", "Petrolio": "#D55E00",
+    "Fossile": "#999999", "Carbone": "#595959", "Gas": "#F0E442", "Petrolio": "#D55E00",
     "Nucleare": PALETTE["nucleare"], "Rinnovabili": PALETTE["rinnovabili"],
     "Idroelettrico": "#0072B2", "Eolico": "#56B4E9", "Solare": PALETTE["rinnovabili"],
     "Bioenergie": "#CC79A7", "Altre rinnovabili": "#999999",
@@ -526,7 +528,7 @@ def main() -> None:
             imports = d_idx["net_elec_imports_share_demand"].dropna() if "net_elec_imports_share_demand" in d_idx.columns else pd.Series(dtype=float)
             if not imports.empty:
                 fig = px.bar(imports.reset_index(), x="year", y="net_elec_imports_share_demand", labels={"year": "", "net_elec_imports_share_demand": "% del fabbisogno"}, template="plotly_white")
-                fig.add_hline(y=0, line_color="black", line_width=1)
+                fig.add_hline(y=0, line_color="#888888", line_width=1)
                 fig.update_layout(height=320, title="Import netto sul fabbisogno elettrico (negativo = esportatore)")
                 st.plotly_chart(fig, width="stretch")
             else:

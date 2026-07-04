@@ -52,7 +52,7 @@ def main() -> None:
         fig.add_trace(
             go.Scatter(
                 x=[peak_row["year"]], y=[peak_row["nuclear_share_elec"]], mode="markers",
-                marker=dict(color="black", size=8), showlegend=False,
+                marker=dict(color="#888888", size=8), showlegend=False,
                 hovertemplate=f"Picco {int(peak_row['year'])}: {peak_row['nuclear_share_elec']:.0f}%<extra></extra>",
             ),
             row=row, col=col,

@@ -109,8 +109,8 @@ def main() -> None:
             template="plotly_white",
         )
         fig.update_traces(textposition="top center", textfont_size=9)
-        fig.add_hline(y=0, line_color="black", line_width=0.6)
-        fig.add_vline(x=0, line_color="black", line_width=0.6)
+        fig.add_hline(y=0, line_color="#888888", line_width=0.6)
+        fig.add_vline(x=0, line_color="#888888", line_width=0.6)
         fig.update_layout(showlegend=False, height=440)
         col.plotly_chart(fig, width="stretch")
 
