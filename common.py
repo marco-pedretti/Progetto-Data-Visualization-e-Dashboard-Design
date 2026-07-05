@@ -63,11 +63,23 @@ NUCLEAR_EVENTS = {
     "France": (2015, "Legge transizione energetica"),
 }
 
-# Copertura mondiale: prima del 2000 pochissimi paesi fuori Europa hanno dati (Cap. 3.2 del
-# notebook), il 2025 è pesantemente right-censored (Cap. 3.3, ~90 paesi su 220). Il range
-# 2000-2024 è la finestra con copertura ampia e stabile per tutte le metriche della mappa.
-WORLD_YEAR_START = 2000
-WORLD_YEAR_END = 2024
+# Range esteso al massimo disponibile nel dataset (Cap. 3.2/3.3 del notebook): 1985 è il floor
+# storico di electricity_generation (Cap. 3.4, "Firme storiche"), 2025 è l'ultimo anno pubblicato
+# ma pesantemente right-censored fuori Europa (~90 paesi su 220). In precedenza il range era
+# ristretto a 2000-2024 proprio per evitare troppi paesi "grigi silenziosi"; ora che il dato
+# mancante ha un indicatore esplicito e consistente (vedi MAP_NO_DATA_COLOR), l'intero range è
+# mostrabile onestamente — la sparsità diventa informazione (es. carbon_intensity_elec non esiste
+# per NESSUN paese nel 1985: la mappa sarà tutta "nessun dato", correttamente).
+WORLD_YEAR_START = 1985
+WORLD_YEAR_END = 2025
+
+# Colore fisso per "nessun dato disponibile" nella mappa, indipendente dalla metrica scelta.
+# Deliberatamente estraneo alle 5 colorscale sequenziali usate sotto (Greys/Oranges/Greens/
+# YlOrRd/Blues): un grigio si confonderebbe con l'estremo chiaro di "Greys" o del grigio di
+# default di Plotly per i paesi senza traccia, rendendo "nessun dato" indistinguibile da "valore
+# basso". Un tono lavanda non compare in nessuna delle scale, quindi il significato è univoco a
+# prescindere dalla metrica visualizzata.
+MAP_NO_DATA_COLOR = "#8A7CA8"
 
 # Metriche disponibili per la mappa (solo settore elettrico, non emissioni economy-wide):
 # scala colore a tinta unica coerente con PALETTE per le tre fonti, YlOrRd per l'intensità
