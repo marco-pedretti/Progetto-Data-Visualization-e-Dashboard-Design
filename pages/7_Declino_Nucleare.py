@@ -1,8 +1,8 @@
 """
 Pagina 7: Declino del nucleare (Storia)
 ============================================
-Corrisponde al Cap. 4.8 del notebook: i cinque paesi già isolati in "Chi sostituisce
-chi" (Cap. 4.6) come eccezione (dove il calo del nucleare coincide con la crescita
+Corrisponde al Cap. 4.7 del notebook: i cinque paesi già isolati in "Chi sostituisce
+chi" (Cap. 4.5) come eccezione (dove il calo del nucleare coincide con la crescita
 rinnovabile, non con il fossile) mostrano ciascuno un picco storico seguito da un
 evento politico preciso, non un trend generico. Serie estesa dal 1985 (non il solo
 panel bilanciato 1990-2022): per Belgio e Lituania il picco storico cade a ridosso o

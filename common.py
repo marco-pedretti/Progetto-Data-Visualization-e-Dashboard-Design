@@ -50,8 +50,6 @@ EXPORT_COLOR = "#7FA6C9"  # esportatore netto (valore negativo)
 PANEL_YEAR_START = 1990
 PANEL_YEAR_END = 2022
 
-PROFILE_COUNTRIES = ["France", "Germany", "Poland", "Denmark", "Italy"]
-
 # Nomi italiani dei paesi del panel (i dati OWID usano l'inglese): la UI è in italiano, così le
 # etichette dei grafici e la prosa restano coerenti. `.get(name, name)` come fallback per entità
 # non mappate. Condiviso; alcune pagine hanno ancora un dizionario locale ridotto (storico).
@@ -67,7 +65,7 @@ IT_NAME = {
     "Sweden": "Svezia", "Ukraine": "Ucraina", "United Kingdom": "Regno Unito",
 }
 
-# Cap. 4.8: i 5 paesi isolati in 4.6 come eccezione (calo nucleare concomitante alla crescita
+# Cap. 4.7: i 5 paesi isolati in 4.5 come eccezione (calo nucleare concomitante alla crescita
 # rinnovabile), con l'evento politico che spiega il declino: anno e didascalia verificati contro
 # il picco/valore 2022 reale di nuclear_share_elec, non solo affermati.
 NUCLEAR_EVENTS = {
@@ -154,7 +152,7 @@ def weighted_shares(d: pd.DataFrame) -> dict:
 def get_share_deltas(bal_all: pd.DataFrame, year_start: int, year_end: int) -> pd.DataFrame:
     """Variazione delle quote fossile/nucleare/rinnovabili tra due anni, un valore per paese.
 
-    Stessa logica del Cap. 4.4/4.6 del notebook (pivot su due anni, differenza). Richiesta da
+    Stessa logica del Cap. 4.3/4.5 del notebook (pivot su due anni, differenza). Richiesta da
     entrambe le pagine "Chi sostituisce chi" (ranking e correlazione) sugli stessi due anni.
     """
     two_years = bal_all[bal_all["year"].isin([year_start, year_end])].pivot_table(
@@ -177,7 +175,7 @@ def get_carbon_intensity() -> pd.DataFrame:
     Esclude dal calcolo, numeratore e denominatore insieme, le righe senza carbon_intensity_elec:
     la Russia non ha questa colonna per il 1990-1999 e, se non esclusa da entrambi i lati del
     rapporto, abbassa artificialmente la media proprio nei primi anni (bug trovato e corretto nel
-    Cap. 4.7 del notebook). "europe_owid" è l'aggregato pubblicato direttamente da OWID, usato lì
+    Cap. 4.6 del notebook). "europe_owid" è l'aggregato pubblicato direttamente da OWID, usato lì
     come validazione indipendente del calcolo sul panel.
     """
     bal_all, _, _ = get_balanced_panel()
@@ -196,7 +194,7 @@ def get_nuclear_history(countries: list[str]) -> pd.DataFrame:
 
     Serve perché il picco storico di alcuni paesi (Belgio 1986, Lituania 1993) cade a ridosso o
     prima della soglia 1990 del panel bilanciato (Cap. 4.1): qui non serve la completezza su tutte
-    le KEY_COLS, solo nuclear_share_elec (Cap. 4.8 del notebook).
+    le KEY_COLS, solo nuclear_share_elec (Cap. 4.7 del notebook).
     """
     df = load_raw_data()
     df_eu = df[df["iso_code"].isin(EUROPE_ISO)].copy()
@@ -214,7 +212,7 @@ def get_world_data() -> pd.DataFrame:
 def get_scope_kpis(df_year: pd.DataFrame) -> dict:
     """KPI pesati (generazione, quote, intensità di carbonio) su un blocco dati di un solo anno.
 
-    Stessa regola di mascheramento NaN del Cap. 4.7: l'intensità di carbonio esclude,
+    Stessa regola di mascheramento NaN del Cap. 4.6: l'intensità di carbonio esclude,
     numeratore e denominatore insieme, i paesi senza carbon_intensity_elec quell'anno.
     """
     shares = weighted_shares(df_year)

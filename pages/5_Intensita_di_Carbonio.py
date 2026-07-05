@@ -1,7 +1,7 @@
 """
 Pagina 5: Intensità di carbonio (Storia)
 ============================================
-Corrisponde al Cap. 4.7 del notebook: l'intensità di carbonio del mix elettrico
+Corrisponde al Cap. 4.6 del notebook: l'intensità di carbonio del mix elettrico
 (gCO2eq/kWh) come indicatore di esito, alternativo alle quote di mix: nucleare e
 rinnovabili sono entrambe fonti a basse emissioni, quindi la sola quota non dice se
 un paese ha davvero ridotto le proprie emissioni. Solo il calcolo corretto (media
@@ -11,7 +11,7 @@ portato a questa correzione resta nel notebook, non in dashboard.
 Libertà limitata: si può affiancare alla media europea l'andamento di un singolo
 paese, ma il grafico e la narrazione principale restano fissi.
 
-Estesa (← Cap. 4.9 del notebook) con uno scatter fisso quota fossile vs intensità di
+Estesa (← Cap. 4.8 del notebook) con uno scatter fisso quota fossile vs intensità di
 carbonio sull'ultimo anno del panel, per mostrare esplicitamente perché le due
 metriche sono correlate ma non intercambiabili.
 """

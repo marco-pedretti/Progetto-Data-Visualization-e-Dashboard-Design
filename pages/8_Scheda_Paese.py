@@ -275,7 +275,7 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, series_specs: list, unit: str
 
 # Unità "di grandezza" (non normalizzate): per queste il rank tra paesi misura soprattutto la
 # dimensione del paese, non una performance: va detto accanto al percentile, stessa logica delle
-# note di contesto sulle metriche di ranking (Cap. 4.11 del notebook).
+# note di contesto sulle metriche di ranking (Sintesi per la dashboard, in fondo al Cap. 4 del notebook).
 ABSOLUTE_UNITS = {"TWh", "TWh eq.", "persone", "international-$", "Mt CO₂eq"}
 
 

@@ -1,10 +1,10 @@
 """
 Pagina 3: Strategie nazionali a confronto (Esplora)
 =======================================================
-Confronto libero tra due e quattro paesi (default testa-a-testa). Eredita dal vecchio
-"Cinque strategie nazionali" (Cap. 4.3) l'idea che la media europea nasconda traiettorie
-molto diverse, ma la apre a scelta dell'utente: paesi qualunque invece di cinque profili
-fissi. Da qui la ricollocazione tra le pagine Esplora.
+Confronto libero tra due e quattro paesi (default testa-a-testa). Eredita dai "cinque
+profili nazionali" del notebook (una sezione poi rimossa in revisione) l'idea che la media
+europea nasconda traiettorie molto diverse, ma la apre a scelta dell'utente: paesi qualunque
+invece di cinque profili fissi. Da qui la ricollocazione tra le pagine Esplora.
 
 La pagina alterna due registri, e adatta il numero di colonne ai paesi scelti (2–4):
 - sezioni **a colonne** (una per paese) per ciò che si legge meglio in parallelo ma non si

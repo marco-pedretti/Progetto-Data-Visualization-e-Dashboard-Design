@@ -1,7 +1,7 @@
 """
 Pagina 4: Chi sostituisce chi (Storia)
 ==========================================
-Corrisponde ai Cap. 4.4 e 4.6 del notebook: ranking "chi ha trasformato di più il
+Corrisponde ai Cap. 4.3 e 4.5 del notebook: ranking "chi ha trasformato di più il
 mix" e scatter di correlazione Δrinnovabili vs Δfossile/Δnucleare sui 33 paesi del
 panel bilanciato. Tutti i numeri della narrazione sono ricalcolati a schermo, non
 scritti a mano, così restano corretti anche cambiando gli anni di confronto.
