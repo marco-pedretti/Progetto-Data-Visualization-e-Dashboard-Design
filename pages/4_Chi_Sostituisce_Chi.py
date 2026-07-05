@@ -13,7 +13,7 @@ sempre l'intero panel bilanciato) né il tipo di grafico.
 import plotly.express as px
 import streamlit as st
 
-from common import HIGHLIGHT_COUNTRIES, PALETTE, PANEL_YEAR_END, PANEL_YEAR_START, SOURCE_NOTE, get_balanced_panel, get_share_deltas, limit_page_width
+from common import HIGHLIGHT_COUNTRY, IT_NAME, PALETTE, PANEL_YEAR_END, PANEL_YEAR_START, SOURCE_NOTE, get_balanced_panel, get_share_deltas, limit_page_width
 
 bal_all, complete_countries, _ = get_balanced_panel()
 
@@ -88,11 +88,31 @@ def main() -> None:
         "accurato secondo Cleveland & McGill per una correlazione tra due variabili continue."
     )
 
-    deltas["evidenziato"] = deltas["country"].isin(HIGHLIGHT_COUNTRIES)
-    deltas["etichetta"] = deltas["country"].where(deltas["evidenziato"], "")
+    # Eccezione al pattern dominante ("le rinnovabili sostituiscono il fossile"): i paesi in cui,
+    # nell'intervallo scelto, è il NUCLEARE — più del fossile — ad aver ceduto quota mentre le
+    # rinnovabili crescevano. Calcolata dai dati, non una lista fissa: così resta vera al variare
+    # degli anni e coincide con i punti evidenziati. Δnuc < -5 p.p. esclude i cali trascurabili;
+    # |Δnuc| > |Δfos| isola i casi dove il nucleare è il bersaglio, non un comprimario (altrimenti
+    # entrerebbero Regno Unito/Paesi Bassi, dove il calo di quota è quasi tutto fossile).
+    is_exc = (
+        (deltas["d_renewables"] > 0)
+        & (deltas["d_nuclear"] < -5)
+        & (deltas["d_nuclear"].abs() > deltas["d_fossil"].abs())
+    )
+    deltas["evidenziato"] = is_exc
+    deltas["etichetta"] = [IT_NAME.get(c, c) if e else "" for c, e in zip(deltas["country"], is_exc)]
 
     corr_fossil = deltas["d_renewables"].corr(deltas["d_fossil"])
     corr_nuclear = deltas["d_renewables"].corr(deltas["d_nuclear"])
+
+    # Declutter etichette: alterno alto/basso secondo il rango sull'asse x (Δrinnovabili), così due
+    # paesi-eccezione con Δ simili (es. Spagna e Belgio, quasi coincidenti) finiscono uno sopra e uno
+    # sotto invece di accavallarsi. Deterministico e indipendente dagli anni (il set cambia con lo slider),
+    # quindi non serve — e non sarebbe possibile — assegnare le posizioni a mano come nella pagina 5.
+    exc_rows = deltas[is_exc]
+    xrank = exc_rows["d_renewables"].rank(method="first").astype(int)
+    pos_map = dict(zip(exc_rows["country"], ["top center" if r % 2 else "bottom center" for r in xrank]))
+    exc_positions = [pos_map[c] for c in exc_rows["country"]]
 
     col_a, col_b = st.columns(2)
     for col, y_col, label, corr in [
@@ -101,7 +121,7 @@ def main() -> None:
     ]:
         fig = px.scatter(
             deltas, x="d_renewables", y=y_col, text="etichetta", color="evidenziato",
-            color_discrete_map={True: PALETTE["calo"], False: PALETTE["rinnovabili"]},
+            color_discrete_map={True: HIGHLIGHT_COUNTRY, False: PALETTE["fossile"]},
             labels={
                 "d_renewables": f"Δ quota rinnovabili {year_start}→{year_end} (p.p.)",
                 y_col: f"Δ quota {label} {year_start}→{year_end} (p.p.)",
@@ -109,27 +129,59 @@ def main() -> None:
             title=f"r = {corr:.2f}",
             template="plotly_white",
         )
-        fig.update_traces(textposition="top center", textfont_size=9)
+        fig.update_traces(textfont_size=9)
+        # Etichette: posizione a array (alto/basso alternati) sul solo trace evidenziato; l'altro non
+        # ha testo, la sua posizione è irrilevante.
+        for tr in fig.data:
+            tr.textposition = exc_positions if tr.marker.color == HIGHLIGHT_COUNTRY else "top center"
         fig.add_hline(y=0, line_color="#888888", line_width=0.6)
         fig.add_vline(x=0, line_color="#888888", line_width=0.6)
         fig.update_layout(showlegend=False, height=440)
         col.plotly_chart(fig, width="stretch")
 
-    st.caption(f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, variazione quote {year_start} vs {year_end}")
+    st.caption(
+        f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, variazione quote {year_start} vs {year_end}. "
+        "In blu i paesi-eccezione (calo di nucleare maggiore del calo di fossile)."
+    )
 
     bersaglio = "fossile" if abs(corr_fossil) > abs(corr_nuclear) else "nucleare"
+    exc_df = deltas[is_exc].sort_values("d_nuclear")
+    exc_it = [IT_NAME.get(c, c) for c in exc_df["country"]]
+
+    def _join_it(names: list[str]) -> str:
+        if len(names) <= 1:
+            return names[0] if names else ""
+        return ", ".join(names[:-1]) + " e " + names[-1]
+
+    # Ragioni storiche note (non calcolabili): mostrate solo per i paesi-eccezione che compaiono
+    # davvero nell'intervallo scelto. Tutte e tre femminili → l'articolo "la" è sempre corretto.
+    REASONS = {
+        "Lithuania": "la Lituania ha chiuso Ignalina come condizione di adesione all'UE",
+        "Germany": "la Germania è uscita dal nucleare dopo Fukushima (2011)",
+        "Sweden": "la Svezia ha ridotto gradualmente la propria flotta per scelta interna",
+    }
+    noted = [REASONS[c] for c in exc_df["country"] if c in REASONS]
+
+    if exc_it:
+        testo_ecc = (
+            f"L'eccezione — i paesi in cui è il nucleare, **più del fossile**, ad aver ceduto quota "
+            f"mentre le rinnovabili crescevano — è **{_join_it(exc_it)}** ({len(exc_it)} su 33). "
+        )
+        if noted:
+            testo_ecc += "Ragioni specifiche a ciascuno: " + "; ".join(noted) + ". "
+    else:
+        testo_ecc = (
+            "In questo intervallo nessun paese mostra un calo di nucleare maggiore di quello del fossile. "
+        )
+
     st.markdown(
         f"In questo intervallo la correlazione è più forte con il **{bersaglio}** "
-        f"(r = {corr_fossil:.2f} col fossile, r = {corr_nuclear:.2f} col nucleare): nella maggioranza "
-        "dei 33 paesi il nucleare non è mai stato presente o è rimasto stabile, e la crescita delle "
-        "rinnovabili ha eroso soprattutto quota fossile. Un piccolo gruppo — **Germania**, "
-        "**Lituania**, **Svezia**, e in misura minore Francia e Belgio — è l'eccezione in cui un calo "
-        "di nucleare *coesiste* con la crescita rinnovabile, per ragioni specifiche: la Lituania ha "
-        "chiuso la centrale di Ignalina come condizione di adesione all'UE, la Svezia ha ridotto "
-        "gradualmente la sua flotta per scelta interna, la Germania ha deciso l'uscita dal nucleare "
-        "dopo Fukushima (2011). Il pattern tedesco non è quindi un'anomalia isolata, ma nemmeno la "
-        "norma: per la maggior parte degli altri paesi del panel — **Italia** inclusa, priva di "
-        "nucleare da confrontare — è il fossile, non il nucleare, ad aver ceduto terreno."
+        f"(r = {corr_fossil:.2f} col fossile, r = {corr_nuclear:.2f} col nucleare): nella maggior parte "
+        "dei 33 paesi il nucleare non era presente o è rimasto stabile, e la crescita delle rinnovabili "
+        "ha eroso soprattutto quota fossile. "
+        + testo_ecc
+        + "Nel resto del panel — **Italia** inclusa, che di nucleare non ne ha — a cedere terreno è il "
+        "fossile, non il nucleare."
     )
 
 

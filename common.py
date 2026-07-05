@@ -31,6 +31,12 @@ SOURCE_COLS = {"fossile": "fossil", "nucleare": "nuclear", "rinnovabili": "renew
 PALETTE = {"fossile": "#999999", "nucleare": "#E69F00", "rinnovabili": "#009E73", "calo": "#D55E00"}
 SOURCE_NOTE = "Fonte: OWID Energy Dataset (Ember; Energy Institute)"
 
+# Colore per i punti "evidenziati" negli scatter (paesi di riferimento/eccezione): blu Okabe-Ito,
+# NON PALETTE["calo"] (vermillion), che in tutta la dashboard significa "calo/anomalia" — i punti
+# evidenziati non sono anomalie, sono solo riferimenti. Condiviso tra le pagine con scatter
+# (Intensità di carbonio, Chi sostituisce chi) così l'evidenza ha sempre lo stesso significato.
+HIGHLIGHT_COUNTRY = "#0072B2"
+
 # Import/export netto: il segno è una direzione (chi compra vs chi vende elettricità), non un
 # giudizio di merito — niente verde/rosso ("buono/cattivo" fuori luogo qui). Due toni tenui,
 # distinti per tonalità (ambra vs blu, non solo per luminosità) così restano leggibili anche in
@@ -48,9 +54,21 @@ PROFILE_COUNTRIES = ["France", "Germany", "Poland", "Denmark", "Italy"]
 # Esclusi dal panel bilanciato per serie incomplete 1990-2022 (Cap. 4.1): selezionabili
 # a parte con avviso, mai inclusi di default (Svizzera e Islanda sono casi estremi).
 EXTRA_COUNTRIES = ["Switzerland", "Iceland"]
-# Paesi da evidenziare nello scatter di correlazione (Cap. 4.6): eccezione (calo nucleare
-# concomitante alla crescita rinnovabile) o profilo di riferimento già discusso altrove.
-HIGHLIGHT_COUNTRIES = ["Germany", "Lithuania", "Denmark", "France", "Sweden", "Italy"]
+
+# Nomi italiani dei paesi del panel (i dati OWID usano l'inglese): la UI è in italiano, così le
+# etichette dei grafici e la prosa restano coerenti. `.get(name, name)` come fallback per entità
+# non mappate. Condiviso; alcune pagine hanno ancora un dizionario locale ridotto (storico).
+IT_NAME = {
+    "Austria": "Austria", "Belgium": "Belgio", "Bulgaria": "Bulgaria", "Croatia": "Croazia",
+    "Cyprus": "Cipro", "Czechia": "Cechia", "Denmark": "Danimarca", "Estonia": "Estonia",
+    "Finland": "Finlandia", "France": "Francia", "Germany": "Germania", "Greece": "Grecia",
+    "Hungary": "Ungheria", "Ireland": "Irlanda", "Italy": "Italia", "Latvia": "Lettonia",
+    "Lithuania": "Lituania", "Luxembourg": "Lussemburgo", "Malta": "Malta",
+    "Netherlands": "Paesi Bassi", "North Macedonia": "Macedonia del Nord", "Norway": "Norvegia",
+    "Poland": "Polonia", "Portugal": "Portogallo", "Romania": "Romania", "Russia": "Russia",
+    "Serbia": "Serbia", "Slovakia": "Slovacchia", "Slovenia": "Slovenia", "Spain": "Spagna",
+    "Sweden": "Svezia", "Ukraine": "Ucraina", "United Kingdom": "Regno Unito",
+}
 
 # Cap. 4.8: i 5 paesi isolati in 4.6 come eccezione (calo nucleare concomitante alla crescita
 # rinnovabile), con l'evento politico che spiega il declino — anno e didascalia verificati contro

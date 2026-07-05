@@ -19,16 +19,13 @@ metriche sono correlate ma non intercambiabili.
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import PALETTE, SOURCE_NOTE, get_balanced_panel, get_carbon_intensity, limit_page_width
+from common import HIGHLIGHT_COUNTRY, PALETTE, SOURCE_NOTE, get_balanced_panel, get_carbon_intensity, limit_page_width
 
 bal_all, complete_countries, _ = get_balanced_panel()
 carbon = get_carbon_intensity()
 
-# Colore neutro per i paesi evidenziati nello scatter: NON PALETTE["calo"] (vermillion), che in
-# tutta la dashboard significa "calo/anomalia" — questi paesi non sono anomalie, sono solo punti di
-# riferimento etichettati. Blu Okabe-Ito, distinto dal grigio dei punti base e sicuro in dark mode.
-HIGHLIGHT_COUNTRY = "#0072B2"
-
+# HIGHLIGHT_COUNTRY (blu neutro per i punti evidenziati, non il vermillion "anomalia") è condiviso
+# in common.py con l'altra pagina a scatter (Chi sostituisce chi).
 # Posizione dell'etichetta scelta a mano per paese: i sei riferimenti si affollano nella fascia ad
 # alta quota fossile (Germania/Paesi Bassi/Italia) e nell'angolo in basso a sinistra (Francia/Norvegia),
 # dove un unico "top center" farebbe sovrapporre i testi. Ogni etichetta è spostata lontano dai vicini.
