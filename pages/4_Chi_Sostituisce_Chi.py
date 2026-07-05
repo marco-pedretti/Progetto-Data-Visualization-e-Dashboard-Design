@@ -53,7 +53,7 @@ def main() -> None:
     )
     fig.update_layout(height=900, showlegend=False)
     st.plotly_chart(fig, width="stretch")
-    st.caption(f"{SOURCE_NOTE} · panel bilanciato, {year_start} vs {year_end}")
+    st.caption(f"{SOURCE_NOTE} · {year_start} vs {year_end}")
 
     min_row = deltas.loc[deltas["d_renewables"].idxmin()]
     if min_row["d_renewables"] < 0:
@@ -140,7 +140,7 @@ def main() -> None:
         col.plotly_chart(fig, width="stretch")
 
     st.caption(
-        f"{SOURCE_NOTE} · panel bilanciato, 33 paesi, variazione quote {year_start} vs {year_end}. "
+        f"{SOURCE_NOTE} · 33 paesi, variazione quote {year_start} vs {year_end}. "
         "In blu i paesi-eccezione (calo di nucleare maggiore del calo di fossile)."
     )
 
@@ -180,7 +180,7 @@ def main() -> None:
         "dei 33 paesi il nucleare non era presente o è rimasto stabile, e la crescita delle rinnovabili "
         "ha eroso soprattutto quota fossile. "
         + testo_ecc
-        + "Nel resto del panel (**Italia** inclusa, che di nucleare non ne ha) a cedere terreno è il "
+        + "Nel resto del gruppo (**Italia** inclusa, che di nucleare non ne ha) a cedere terreno è il "
         "fossile, non il nucleare."
     )
 

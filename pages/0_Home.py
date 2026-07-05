@@ -19,22 +19,17 @@ Rifiniture successive (richieste esplicite utente, 2026-07-05):
   nulla in pagina a cui riferirsi.
 - Rimossa anche l'ultima riga KPI: era l'ultimo residuo del "fare il lavoro delle pagine"
   (una quota decontestualizzata di un solo anno, che vive con contesto nelle pagine). La Home
-  ora è pura landing: orienta e aggancia, nessun dato analitico. `get_balanced_panel()` resta
-  solo per la nota metodologica in fondo (n. paesi/esclusi ricalcolati, non scritti a mano).
+  ora è pura landing: orienta e aggancia, nessun dato analitico.
 - Titolo "Il mix elettrico europeo" (era "Mix energetico in Europa"): preciso rispetto al cuore
   della dashboard (generazione elettrica), non l'energia totale.
+- Rimossa la nota metodologica sul panel bilanciato in fondo pagina (richiesta esplicita
+  dell'utente): è un dettaglio interno senza un grafico a cui riferirsi qui, e ora che tutti i
+  paesi sono selezionabili in ogni pagina Esplora non serve più rassicurare su chi è escluso.
 """
 
 import streamlit as st
 
-from common import (
-    DATA_DIR,
-    PANEL_YEAR_END,
-    PANEL_YEAR_START,
-    SOURCE_NOTE,
-    get_balanced_panel,
-    limit_page_width,
-)
+from common import DATA_DIR, limit_page_width
 
 
 @st.cache_data
@@ -119,14 +114,4 @@ dl2.download_button(
     file_name="owid-energy-codebook.csv",
     mime="text/csv",
     width="stretch",
-)
-
-st.divider()
-
-# Panel bilanciato solo per la nota metodologica in fondo (numeri ricalcolati, non a mano).
-_, complete_countries, excluded = get_balanced_panel()
-st.caption(
-    f"{SOURCE_NOTE}. Panel bilanciato (usato nelle pagine Storia): {len(complete_countries)} "
-    f"paesi europei con serie complete {PANEL_YEAR_START}–{PANEL_YEAR_END}. Esclusi dal panel "
-    f"(serie incomplete): {', '.join(excluded)}, comunque selezionabili in tutte le pagine Esplora."
 )

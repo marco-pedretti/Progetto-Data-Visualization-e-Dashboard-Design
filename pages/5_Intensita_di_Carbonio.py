@@ -58,7 +58,7 @@ def main() -> None:
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=carbon.index, y=carbon["panel_bilanciato"], name="Panel bilanciato (33 paesi)",
+        x=carbon.index, y=carbon["panel_bilanciato"], name="Media dei 33 paesi",
         line=dict(color=PALETTE["nucleare"], width=2.5),
     ))
     fig.add_trace(go.Scatter(
@@ -82,12 +82,12 @@ def main() -> None:
     )
     fig.update_yaxes(rangemode="tozero")
     st.plotly_chart(fig, width="stretch")
-    st.caption(f"{SOURCE_NOTE} · panel bilanciato, righe con carbon_intensity_elec valido")
+    st.caption(f"{SOURCE_NOTE} · 33 paesi, righe con carbon_intensity_elec valido")
 
     first_year = int(carbon.index.min())
     min_year = int(carbon["panel_bilanciato"].idxmin())
     st.markdown(
-        f"L'intensità di carbonio del panel scende in modo pressoché continuo da "
+        f"L'intensità di carbonio media scende in modo pressoché continuo da "
         f"**{carbon['panel_bilanciato'].loc[first_year]:.0f} gCO₂/kWh ({first_year}) a "
         f"{carbon['panel_bilanciato'].loc[min_year]:.0f} ({min_year})** (quasi dimezzata), "
         "validata dal confronto con l'aggregato \"Europe\" pubblicato direttamente da OWID "
@@ -96,7 +96,7 @@ def main() -> None:
         f"{carbon['panel_bilanciato'].loc[last_year]:.0f}): non un'inversione di tendenza ma uno "
         "shock di un solo anno: la produzione nucleare francese è scesa di circa un quinto per le "
         "ispezioni sulla corrosione da stress dei reattori, mentre la siccità ha ridotto "
-        "l'idroelettrico nel panel; la differenza è stata coperta da fossile."
+        "l'idroelettrico; la differenza è stata coperta da fossile."
     )
 
     if country:
@@ -142,7 +142,7 @@ def main() -> None:
     fig2.update_xaxes(range=[0, 100])
     fig2.update_yaxes(rangemode="tozero")
     st.plotly_chart(fig2, width="stretch")
-    st.caption(f"{SOURCE_NOTE} · panel bilanciato, 33 paesi, {last_year}")
+    st.caption(f"{SOURCE_NOTE} · 33 paesi, {last_year}")
 
     # Numeri ricalcolati dai dati, non scritti a mano (convenzione della dashboard): il confronto
     # Germania/Paesi Bassi è il fulcro della pagina, deve restare vero se il dato cambia.

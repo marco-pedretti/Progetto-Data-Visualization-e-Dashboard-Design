@@ -155,7 +155,7 @@ def main() -> None:
         title="Ogni declino nucleare ha un evento preciso, non è un trend generico",
     )
     st.plotly_chart(fig, width="stretch")
-    st.caption(f"{SOURCE_NOTE} · quota % della generazione, serie estesa dal 1985 (non solo il panel bilanciato)")
+    st.caption(f"{SOURCE_NOTE} · quota % della generazione, serie dal 1985 (oltre l'intervallo 1990-2022 usato altrove)")
 
     st.subheader("Il divario tra picco ed evento")
     st.markdown(

@@ -321,17 +321,16 @@ def main() -> None:
     limit_page_width()
     st.title("🔎 Scheda Paese")
     st.markdown(
-        "Scheda libera su un'entità qualunque: non è vincolata al panel bilanciato usato nel resto "
-        "della dashboard, quindi include anche i casi esclusi (Svizzera, Islanda...), l'Ucraina, o "
-        "aggregati come **World**/**Europe**. Ogni grafico mostra solo gli anni per cui esiste "
-        "davvero il dato: se una serie inizia tardi o ha un buco, il grafico lo mostra invece di "
-        "nasconderlo."
+        "Scheda libera su un'entità qualunque: nessuna esclusione, comprese le entità con serie "
+        "meno complete o aggregati come **World**/**Europe**. Ogni grafico mostra solo gli anni per "
+        "cui esiste davvero il dato: se una serie inizia tardi o ha un buco, il grafico lo mostra "
+        "invece di nasconderlo."
     )
 
     entity = st.selectbox(
         "Paese o entità (qualunque, mondo incluso)",
         ALL_ENTITIES, index=ALL_ENTITIES.index(DEFAULT_ENTITY),
-        help='Non solo i 33 paesi del panel bilanciato: anche Svizzera/Islanda/Ucraina e aggregati come "World" o "Europe".',
+        help='Qualunque entità del dataset: ogni paese oltre ad aggregati come "World" o "Europe".',
     )
     d = df_raw[df_raw["country"] == entity].sort_values("year")
     d_idx = d.set_index("year")
