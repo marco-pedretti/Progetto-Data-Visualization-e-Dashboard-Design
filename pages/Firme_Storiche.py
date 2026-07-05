@@ -1,6 +1,6 @@
 """
-Pagina 9: Firme storiche nei dati (Storia)
-==============================================
+Firme storiche nei dati (Storia)
+================================
 Corrisponde al Cap. 3.4 del notebook: la censura a sinistra di `electricity_generation`
 come indicatore geopolitico. Inizialmente esclusa dalla dashboard (2026-07-03, "EDA non
 mix energetico"), re-inclusa su richiesta esplicita dell'utente (2026-07-04) come pagina

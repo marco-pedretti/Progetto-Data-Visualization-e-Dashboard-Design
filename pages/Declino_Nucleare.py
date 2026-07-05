@@ -1,6 +1,6 @@
 """
-Pagina 7: Declino del nucleare (Storia)
-============================================
+Declino del nucleare (Storia)
+=============================
 Corrisponde al Cap. 4.7 del notebook: i cinque paesi già isolati in "Chi sostituisce
 chi" (Cap. 4.5) come eccezione (dove il calo del nucleare coincide con la crescita
 rinnovabile, non con il fossile) mostrano ciascuno un picco storico seguito da un
@@ -14,7 +14,7 @@ banda ombreggiata in ogni riquadro è proprio quella distanza; la tabella la ren
 scansionabile a colpo d'occhio.
 
 Nessuna libertà di personalizzazione: narrazione e cinque paesi sono fissi. A
-differenza di "Cinque strategie nazionali", qui gli eventi politici sono cablati per
+differenza di "Strategie a confronto", qui gli eventi politici sono cablati per
 paese: sostituire uno slot con un altro paese romperebbe la narrazione, non la
 arricchirebbe.
 """

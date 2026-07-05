@@ -1,6 +1,6 @@
 """
-Pagina 3: Strategie nazionali a confronto (Esplora)
-=======================================================
+Strategie a confronto (Esplora)
+===============================
 Confronto libero tra due e quattro paesi (default testa-a-testa). Eredita dai "cinque
 profili nazionali" del notebook (una sezione poi rimossa in revisione) l'idea che la media
 europea nasconda traiettorie molto diverse, ma la apre a scelta dell'utente: paesi qualunque

@@ -1,6 +1,6 @@
 """
-Pagina 8: Scheda Paese (Esplora)
-=====================================
+Scheda Paese (Esplora)
+======================
 Vista libera "tutto il possibile" su una singola entità del dataset OWID: un
 paese, ma anche un aggregato come "World" o "Europe" (mondo incluso, su
 richiesta esplicita dell'utente). A differenza delle altre pagine Esplora

@@ -1,6 +1,6 @@
 """
-Pagina 6: Mappa Europa/Mondo (Esplora)
-==========================================
+Mappa Europa/Mondo (Esplora)
+============================
 Coropleta interattiva del mix elettrico: ambito (Europa/Mondo), metrica e anno
 scelti liberamente, con KPI ricalcolati sullo scope selezionato. Solo variabili
 del settore elettrico (quote fossile/nucleare/rinnovabili, intensità di carbonio,

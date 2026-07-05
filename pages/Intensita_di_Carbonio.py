@@ -1,6 +1,6 @@
 """
-Pagina 5: Intensità di carbonio (Storia)
-============================================
+Intensità di carbonio (Storia)
+==============================
 Corrisponde al Cap. 4.6 del notebook: l'intensità di carbonio del mix elettrico
 (gCO2eq/kWh) come indicatore di esito, alternativo alle quote di mix: nucleare e
 rinnovabili sono entrambe fonti a basse emissioni, quindi la sola quota non dice se
