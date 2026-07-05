@@ -158,10 +158,10 @@ def main() -> None:
     st.title("🕰️ Firme storiche nei dati")
     st.markdown(
         "Nelle altre pagine i dati mancanti sono un problema da gestire; qui sono il **soggetto**. "
-        "La colonna `electricity_generation` non ha nessun buco interno in Europa: una volta "
-        "iniziata, ogni serie corre ininterrotta fino all'ultimo anno disponibile. L'informazione "
-        "storica non sta quindi nei buchi, ma in **quando una serie comincia**, e in quando "
-        "finisce. A patto di saper distinguere il segnale storico dall'artefatto della fonte."
+        "La colonna `electricity_generation` non ha buchi interni in Europa: ogni serie, una volta "
+        "iniziata, corre ininterrotta fino all'ultimo anno disponibile. L'informazione storica sta "
+        "quindi in **quando una serie comincia** e in quando finisce, non nei buchi, a patto di "
+        "distinguere il segnale storico dall'artefatto della fonte."
     )
 
     bounds = get_series_bounds()
@@ -171,26 +171,22 @@ def main() -> None:
 
     st.plotly_chart(timeline_figure(bounds), width="stretch")
     st.caption(
-        f"{SOURCE_NOTE} · electricity_generation, copertura Europa ({n_total} paesi), zero gap "
-        "interni: le barre sono continue perché le serie lo sono davvero, non per semplificazione. "
-        "(I buchi interni esistono nel dataset, ma su altre variabili: l'eolico ne ha in 13 paesi, "
-        "2000-2013, Cap. 3.2 del notebook.) Le serie identiche 1985–2025 sono raggruppate in "
-        "un'unica riga (elenco completo al passaggio del mouse); Ucraina e Islanda restano singole "
-        "perché la loro serie si interrompe prima."
+        f"{SOURCE_NOTE} · electricity_generation, copertura Europa ({n_total} paesi). Zero gap "
+        "interni: le barre sono continue perché le serie lo sono davvero. Le serie identiche "
+        "1985–2025 sono raggruppate in un'unica riga (elenco completo al passaggio del mouse); "
+        "Ucraina e Islanda restano singole perché la loro serie si interrompe prima."
     )
 
     st.subheader("⚠️ La trappola del 1985")
     st.markdown(
-        f"La tentazione narrativa è leggere il 1985 come la firma del blocco post-sovietico: Russia, "
-        f"Ucraina, i tre Baltici partono tutti lì. Ma è una trappola: **{n_1985} dei {n_total} paesi "
-        f"europei** partono nel 1985, comprese Francia, Germania, Italia, Regno Unito e tutta "
-        f"l'Europa occidentale. Il 1985 è il *floor* con cui la fonte (Energy Institute) inizia a "
-        f"pubblicare questa colonna per l'intero continente, non un evento storico. Il dato \"1985\" "
-        f"di Russia, Baltici, Cechia e Slovacchia è anzi una **retropolazione**: i confini attuali "
-        f"proiettati all'indietro, *prima* che quegli Stati esistessero (l'URSS si dissolve nel "
-        f"dicembre 1991, il divorzio di velluto è del gennaio 1993). Persino la riunificazione "
-        f"tedesca (ottobre 1990) è invisibile: la Germania è una serie unica e continua dal 1985: "
-        f"le voci *East Germany* e *West Germany* esistono nel dataset, ma senza un solo valore di "
+        f"La tentazione è leggere il 1985 come la firma del blocco post-sovietico: Russia, Ucraina "
+        f"e i tre Baltici partono tutti lì. Ma è una trappola: **{n_1985} dei {n_total} paesi "
+        f"europei** partono nel 1985, comprese Francia, Germania, Italia e Regno Unito. Il 1985 è "
+        f"il *floor* con cui la fonte (Energy Institute) inizia a pubblicare questa colonna, non un "
+        f"evento storico. Per Russia, Baltici, Cechia e Slovacchia è anzi una **retropolazione**: i "
+        f"confini attuali proiettati all'indietro, *prima* che quegli Stati esistessero. Persino la "
+        f"riunificazione tedesca è invisibile: la Germania è una serie unica dal 1985, mentre le "
+        f"voci *East Germany* e *West Germany* esistono nel dataset senza un solo valore di "
         f"generazione."
     )
 
@@ -199,19 +195,17 @@ def main() -> None:
     g2000 = ", ".join(sorted(late.loc[late["first"] == 2000, "country"]))
     g2005 = ", ".join(sorted(late.loc[late["first"] == 2005, "country"]))
     st.markdown(
-        f"Il segnale storico sta nelle **{len(late)} eccezioni**, e nel loro ordine: **1990** "
-        f"({g1990}), **2000** ({g2000}), **2005** ({g2005}). La sequenza ricalca da vicino la "
-        f"disgregazione jugoslava: Slovenia, Croazia e Macedonia del Nord (indipendenze 1991) "
-        f"partono nel 1990; la Bosnia, devastata dalla guerra 1992-95, solo dal 2000; il Montenegro "
-        f"(indipendenza 2006) dal 2005; sempre **dopo** l'evento politico, mai prima: costruire un "
-        f"sistema statistico nazionale richiede anni. Due avvertenze da onestà intellettuale: "
-        f"**Malta** è nel gruppo 1990 per pura coincidenza di copertura (nessun legame jugoslavo), "
-        f"e la **Moldova** (ex URSS, non ex Jugoslavia) condivide la soglia 2000 con Bosnia e "
-        f"Albania: il raggruppamento è per anno, non per causa comune. Anche il **Kosovo** parte "
-        f"dal 2000, ma vive nel dataset con un codice non-ISO (sovranità contesa) e resta fuori "
-        f"dal conteggio dei {n_total}. Infine, il rovescio metodologico: se i buchi *interni* non "
-        f"esistono è perché le fonti li hanno chiusi a monte con stime e retropolazioni: la forma "
-        f"dell'assenza è modellata dalle scelte editoriali, non solo dalla storia."
+        f"Il segnale storico sta nelle **{len(late)} eccezioni** e nel loro ordine: **1990** "
+        f"({g1990}), **2000** ({g2000}), **2005** ({g2005}). La sequenza ricalca la disgregazione "
+        f"jugoslava: Slovenia, Croazia e Macedonia del Nord (indipendenze 1991) partono nel 1990; "
+        f"la Bosnia, devastata dalla guerra 1992-95, dal 2000; il Montenegro (indipendenza 2006) "
+        f"dal 2005, sempre **dopo** l'evento politico: costruire un sistema statistico richiede "
+        f"anni. Due eccezioni non c'entrano con la Jugoslavia: **Malta** è nel gruppo 1990 per pura "
+        f"coincidenza, e la **Moldova** (ex URSS) condivide la soglia 2000 con Bosnia e Albania solo "
+        f"per anno, non per causa comune. Anche il **Kosovo** parte dal 2000, ma il suo codice "
+        f"non-ISO lo esclude dal conteggio dei {n_total}. Un'ultima nota: se i buchi *interni* non "
+        f"esistono è perché le fonti li hanno già chiusi a monte con stime e retropolazioni: anche "
+        f"l'assenza è una scelta editoriale, non solo storia."
     )
 
     st.subheader("🪦 Anche la fine di una serie è una firma")
@@ -223,14 +217,13 @@ def main() -> None:
     ghost_counts = {e: int((df_raw["country"] == e).sum()) for e in GHOST_ENTITIES}
     st.markdown(
         f"La censura funziona anche a destra. L'**Ucraina** è ferma al **{ukr_last}**: non un "
-        f"ritardo di pubblicazione ma la guerra, che investe anche il sistema statistico di un "
-        f"paese. {others_txt} sono invece ordinari ritardi di pubblicazione; in tabella le due "
-        f"assenze sono identiche, le cause opposte: il dato mancante va sempre interrogato, mai "
-        f"solo contato. Ultima firma, la più silenziosa: *USSR* ({ghost_counts['USSR']} righe), "
-        f"*Yugoslavia* ({ghost_counts['Yugoslavia']}) e *Serbia and Montenegro* "
-        f"({ghost_counts['Serbia and Montenegro']}) **esistono** ancora nel dataset come entità, "
-        f"ma senza un solo valore di generazione elettrica: righe segnaposto di Stati che non ci "
-        f"sono più: lapidi statistiche."
+        f"ritardo di pubblicazione ma la guerra. {others_txt} sono invece ordinari ritardi di "
+        f"pubblicazione: in tabella le due assenze sono identiche, ma le cause opposte, e il dato "
+        f"mancante va sempre interrogato, mai solo contato. Ultima firma, la più silenziosa: "
+        f"*USSR* ({ghost_counts['USSR']} righe), *Yugoslavia* ({ghost_counts['Yugoslavia']}) e "
+        f"*Serbia and Montenegro* ({ghost_counts['Serbia and Montenegro']}) **esistono** ancora nel "
+        f"dataset come entità, ma senza un solo valore di generazione: righe segnaposto di Stati "
+        f"che non ci sono più, lapidi statistiche."
     )
 
 
