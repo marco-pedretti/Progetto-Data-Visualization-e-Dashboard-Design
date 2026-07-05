@@ -8,8 +8,9 @@ di cinque profili fissi. Da qui la ricollocazione tra le pagine Esplora.
 
 La pagina alterna due registri, e adatta il numero di colonne ai paesi scelti (2–4):
 - sezioni **a colonne** (una per paese) per ciò che si legge meglio in parallelo ma non si
-  può sovrapporre: lo scoreboard KPI e la composizione impilata del mix (stack di paesi
-  diversi non stanno sullo stesso grafico);
+  può sovrapporre: lo scoreboard KPI, la composizione impilata del mix (stack di paesi
+  diversi non stanno sullo stesso grafico) e l'import/export elettrico (qui il colore è il
+  segno — importatore/esportatore — non il paese, coerente con Scheda Paese);
 - una sezione **unificata** (una linea per paese sullo stesso asse) per le metriche scalari-per-anno,
   dove la sovrapposizione diretta è proprio il confronto — con un selettore di metrica che
   è la parte di esplorazione libera vera e propria — più la crescita di una fonte nel tempo
@@ -26,7 +27,9 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from common import (
+    EXPORT_COLOR,
     EXTRA_COUNTRIES,
+    IMPORT_COLOR,
     PALETTE,
     SOURCE_NOTE,
     get_balanced_panel,
@@ -139,6 +142,22 @@ def mix_figure(d_c, country: str, mode: str) -> go.Figure:
     return fig
 
 
+def import_export_figure(d_c, country: str) -> "go.Figure | None":
+    """Barre di import netto sul fabbisogno (%) per un paese, colorate per segno (non per paese:
+    qui il colore = direzione import/export, stesso significato di Scheda Paese)."""
+    s = d_c.set_index("year")["net_elec_imports_share_demand"].dropna() if "net_elec_imports_share_demand" in d_c.columns else None
+    if s is None or s.empty:
+        return None
+    bar_colors = [IMPORT_COLOR if v >= 0 else EXPORT_COLOR for v in s.values]
+    fig = go.Figure(go.Bar(x=s.index, y=s.values, marker_color=bar_colors))
+    fig.add_hline(y=0, line_color="#888888", line_width=1)
+    fig.update_layout(
+        title=country, yaxis_title="% del fabbisogno", template="plotly_white",
+        height=340, margin=dict(t=40),
+    )
+    return fig
+
+
 def europe_reference(col: str, years) -> "tuple | None":
     """Serie dell'aggregato OWID 'Europe' per la stessa metrica, come riferimento (o None)."""
     raw = load_raw_data()
@@ -216,6 +235,27 @@ def main() -> None:
         with col:
             st.plotly_chart(mix_figure(d_c, country, mode), width="stretch")
     st.caption(f"{SOURCE_NOTE} — quote fossile/nucleare/rinnovabili, 1990–2022")
+
+    st.divider()
+
+    # --- Import/export elettrico: una colonna per paese, colore = segno (non paese) ---
+    st.subheader("Import ed export elettrico")
+    st.markdown(
+        "Import netto sul fabbisogno elettrico: **ambra** = anno da importatore netto, **blu** = "
+        "anno da esportatore netto. Qui il colore segnala una direzione, non una prestazione — un "
+        "paese può alternare le due condizioni negli anni."
+    )
+    any_imports = False
+    for (country, d_c, _), col in zip(series, st.columns(len(series), border=True)):
+        with col:
+            fig = import_export_figure(d_c, country)
+            if fig is not None:
+                any_imports = True
+                st.plotly_chart(fig, width="stretch")
+            else:
+                st.info(f"Nessun dato di import/export per {country}.")
+    if any_imports:
+        st.caption(f"{SOURCE_NOTE} — import netto in % del fabbisogno elettrico, 1990–2022")
 
     st.divider()
 

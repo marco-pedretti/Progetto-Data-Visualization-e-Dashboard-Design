@@ -31,6 +31,16 @@ SOURCE_COLS = {"fossile": "fossil", "nucleare": "nuclear", "rinnovabili": "renew
 PALETTE = {"fossile": "#999999", "nucleare": "#E69F00", "rinnovabili": "#009E73", "calo": "#D55E00"}
 SOURCE_NOTE = "Fonte: OWID Energy Dataset (Ember; Energy Institute)"
 
+# Import/export netto: il segno è una direzione (chi compra vs chi vende elettricità), non un
+# giudizio di merito — niente verde/rosso ("buono/cattivo" fuori luogo qui). Due toni tenui,
+# distinti per tonalità (ambra vs blu, non solo per luminosità) così restano leggibili anche in
+# scala di grigi o per un daltonico, e abbastanza chiari da non sparire sullo sfondo scuro.
+# L'ambra va sull'import, non sull'export: un tono caldo sui valori negativi (l'export è la barra
+# "sotto zero") si legge come un doppio segnale negativo, facendo sembrare l'export un problema.
+# Condiviso tra Scheda Paese e Strategie a confronto (stesso significato, stesso colore ovunque).
+IMPORT_COLOR = "#D9A566"  # importatore netto (valore positivo)
+EXPORT_COLOR = "#7FA6C9"  # esportatore netto (valore negativo)
+
 PANEL_YEAR_START = 1990
 PANEL_YEAR_END = 2022
 

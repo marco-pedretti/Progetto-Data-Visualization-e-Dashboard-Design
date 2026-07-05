@@ -24,7 +24,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from common import EUROPE_ISO, PALETTE, SOURCE_NOTE, limit_page_width, load_raw_data
+from common import EUROPE_ISO, EXPORT_COLOR, IMPORT_COLOR, PALETTE, SOURCE_NOTE, limit_page_width, load_raw_data
 
 SIMPLE_TWH = [("Fossile", "fossil_electricity"), ("Nucleare", "nuclear_electricity"), ("Rinnovabili", "renewables_electricity")]
 DETAILED_TWH = [
@@ -157,6 +157,20 @@ METRIC_GROUPS: dict[str, list[tuple[str, str, str]]] = {
     ],
 }
 
+# Categorie escluse dall'esploratore libero perché già coperte da una tab dedicata (scelta
+# dell'utente 2026-07-04, per non duplicare): le quote di mix elettrico vivono nella tab
+# "Elettricità", l'energia primaria e la produzione fossile nella tab "Energia primaria", le
+# emissioni/efficienza nella tab "Emissioni & efficienza". Restano qui i temi senza scheda propria:
+# l'elettricità in volume (dove vivono generazione e domanda), il pro-capite e l'import/export.
+EXPLORE_EXCLUDED = {
+    "⚡ Quota sulla generazione elettrica",
+    "🔥 Energia primaria per fonte",
+    "🔥 Quota sul consumo energetico totale",
+    "⛏️ Produzione fonti fossili",
+    "🌍 Emissioni & efficienza",
+}
+EXPLORE_CATEGORIES = [c for c in METRIC_GROUPS if c not in EXPLORE_EXCLUDED]
+
 RAW_COLS_DEFAULT = [
     "year", "population", "gdp",
     "electricity_generation", "fossil_electricity", "nuclear_electricity", "renewables_electricity",
@@ -208,19 +222,33 @@ def human_count(n: float) -> str:
     return f"{n:.0f}"
 
 
-def trend_figure(d_idx: pd.DataFrame, entity: str, col: str, label: str, unit: str, show_refs: bool, show_yoy: bool) -> go.Figure:
-    series = d_idx[col].dropna()
-    title = label
-    y_title = unit
-    if show_yoy:
-        series = series.pct_change() * 100
-        series = series.dropna()
-        title = f"{label} — variazione % anno su anno"
-        y_title = "% anno su anno"
+# Colori per le due metriche a confronto: arancio (metrica principale) + blu, distinti e visibili
+# in dark mode. Con una sola metrica si usa solo il primo.
+TREND_COLORS = (PALETTE["nucleare"], "#0072B2")
+
+
+def trend_figure(d_idx: pd.DataFrame, entity: str, series_specs: list, unit: str, show_refs: bool, show_yoy: bool) -> go.Figure:
+    """Andamento di una o due metriche (stessa unità) per l'entità.
+
+    series_specs è una lista di (label, col): con una sola metrica si può affiancare Europa/Mondo
+    come riferimento; con due metriche il grafico è un confronto interno all'entità (es. domanda vs
+    produzione) sullo stesso asse — mai un doppio asse, per questo le due metriche devono condividere
+    l'unità di misura (garantito da chi chiama).
+    """
+    two = len(series_specs) > 1
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=series.index, y=series.values, name=entity, line=dict(color=PALETTE["nucleare"], width=2.5)))
-    if show_refs:
+    for i, (label, col) in enumerate(series_specs):
+        s = d_idx[col].dropna()
+        if show_yoy:
+            s = s.pct_change().dropna() * 100
+        fig.add_trace(go.Scatter(
+            x=s.index, y=s.values, name=(label if two else entity),
+            line=dict(color=TREND_COLORS[i % len(TREND_COLORS)], width=2.5),
+        ))
+
+    if show_refs and not two:
+        col = series_specs[0][1]
         for ref in ["Europe", "World"]:
             if ref == entity:
                 continue
@@ -229,8 +257,13 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, col: str, label: str, unit: s
                 ref_series = ref_series.pct_change().dropna() * 100
             if not ref_series.empty:
                 fig.add_trace(go.Scatter(x=ref_series.index, y=ref_series.values, name=ref, line=dict(width=1, dash="dash")))
+
+    base = f"{series_specs[0][0]} vs {series_specs[1][0]}" if two else series_specs[0][0]
+    y_title = "% anno su anno" if show_yoy else unit
+    title = f"{base} — variazione % anno su anno — {entity}" if show_yoy else f"{base} — {entity}"
+
     fig.update_layout(
-        title=f"{title} — {entity}", yaxis_title=y_title, template="plotly_white",
+        title=title, yaxis_title=y_title, template="plotly_white",
         height=440, legend=dict(orientation="h", yanchor="bottom", y=1.02),
     )
     fig.update_yaxes(rangemode="tozero")
@@ -354,11 +387,14 @@ def main() -> None:
 
     with tab_explore:
         st.markdown(
-            "Scegli una qualunque delle metriche del dataset OWID raggruppate per area: il grafico "
-            "mostra l'andamento nel tempo, e sotto trovi dove si colloca questa entità rispetto a "
-            "tutti gli altri paesi nell'ultimo anno disponibile."
+            "Esplora le metriche del dataset OWID che non hanno già una scheda propria (energia "
+            "primaria, emissioni e quote di mix elettrico si trovano nelle rispettive tab): il grafico "
+            "mostra l'andamento nel tempo. Puoi **sovrapporre una seconda metrica compatibile** (stessa "
+            "unità di misura — es. domanda vs produzione elettrica) per confrontarle sullo stesso asse. "
+            "Sotto trovi dove si colloca questa entità rispetto a tutti gli altri paesi nell'ultimo anno "
+            "disponibile."
         )
-        category = st.selectbox("Categoria", list(METRIC_GROUPS.keys()))
+        category = st.selectbox("Categoria", EXPLORE_CATEGORIES)
         options = available_metrics(d, METRIC_GROUPS[category])
         if not options:
             st.info(f"Nessun dato disponibile per {entity} in questa categoria.")
@@ -366,15 +402,39 @@ def main() -> None:
             metric_label = st.selectbox("Metrica", [label for label, _, _ in options])
             _, col, unit = next(o for o in options if o[0] == metric_label)
 
-            opt1, opt2 = st.columns(2)
-            show_refs = opt1.checkbox("Confronta con Europa e Mondo", value=False)
-            show_yoy = opt2.checkbox("Mostra variazione % anno su anno", value=False)
+            # Seconda metrica confrontabile: stessa categoria e stessa unità (così condividono l'asse,
+            # niente doppio asse). Se ce n'è almeno una, offro il confronto interno all'entità.
+            compatible = [lbl for lbl, _, u in options if u == unit and lbl != metric_label]
+            metric2_label = "(nessuna)"
+            if compatible:
+                metric2_label = st.selectbox(
+                    "Confronta con una seconda metrica (stessa unità)", ["(nessuna)"] + compatible,
+                    help="Solo metriche nella stessa unità di misura, così condividono lo stesso asse.",
+                )
+            compare = metric2_label != "(nessuna)"
 
-            fig = trend_figure(d_idx, entity, col, metric_label, unit, show_refs, show_yoy)
+            series_specs = [(metric_label, col)]
+            if compare:
+                col2 = next(c for lbl, c, _ in options if lbl == metric2_label)
+                series_specs.append((metric2_label, col2))
+
+            # Il riferimento Europa/Mondo confronta una metrica tra entità: ha senso solo con una
+            # metrica sola, non insieme al confronto interno tra due metriche.
+            if compare:
+                show_refs = False
+                show_yoy = st.checkbox("Mostra variazione % anno su anno", value=False)
+            else:
+                opt1, opt2 = st.columns(2)
+                show_refs = opt1.checkbox("Confronta con Europa e Mondo", value=False)
+                show_yoy = opt2.checkbox("Mostra variazione % anno su anno", value=False)
+
+            fig = trend_figure(d_idx, entity, series_specs, unit, show_refs, show_yoy)
             st.plotly_chart(fig, width="stretch")
 
             st.divider()
             st.subheader("Come si colloca rispetto agli altri paesi")
+            if compare:
+                st.caption(f"Il confronto tra paesi qui sotto usa la prima metrica selezionata (**{metric_label}**).")
             percentile_block(entity, iso_code, col, metric_label, unit, d_idx)
         st.caption(SOURCE_NOTE)
 
@@ -535,9 +595,15 @@ def main() -> None:
         with col_d:
             imports = d_idx["net_elec_imports_share_demand"].dropna() if "net_elec_imports_share_demand" in d_idx.columns else pd.Series(dtype=float)
             if not imports.empty:
-                fig = px.bar(imports.reset_index(), x="year", y="net_elec_imports_share_demand", labels={"year": "", "net_elec_imports_share_demand": "% del fabbisogno"}, template="plotly_white")
+                # Segno = direzione (importatore/esportatore netto), non un giudizio di merito: niente
+                # verde/rosso (semantica "buono/cattivo" fuori luogo qui), due toni tenui Okabe-Ito.
+                bar_colors = [IMPORT_COLOR if v >= 0 else EXPORT_COLOR for v in imports.values]
+                fig = go.Figure(go.Bar(x=imports.index, y=imports.values, marker_color=bar_colors))
                 fig.add_hline(y=0, line_color="#888888", line_width=1)
-                fig.update_layout(height=320, title="Import netto sul fabbisogno elettrico (negativo = esportatore)")
+                fig.update_layout(
+                    height=320, title="Import netto sul fabbisogno elettrico (negativo = esportatore)",
+                    yaxis_title="% del fabbisogno", template="plotly_white",
+                )
                 st.plotly_chart(fig, width="stretch")
             else:
                 st.info("Nessun dato di import/export elettrico per questa entità.")
