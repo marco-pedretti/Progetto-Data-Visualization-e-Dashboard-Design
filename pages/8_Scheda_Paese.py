@@ -53,16 +53,19 @@ DETAILED_ENERGY_SHARE = [
 ]
 
 # Okabe-Ito, colorblind-safe: 8 tinte usate una sola volta ciascuna sul set fossile
-# dettagliato (carbone/gas/petrolio) + quello già esistente per l'elettricità. Il grigio è
-# riusato tra "Fossile" aggregato e "Altre rinnovabili" perché non compaiono mai insieme
-# nello stesso grafico (sono alternative dello stesso radio "Semplice/Dettagliato"). Niente
-# nero puro per il carbone: Streamlit ridisegna Plotly con sfondo scuro in dark mode e il
-# nero vi sparisce del tutto — grigio scuro invece, visibile su entrambi i temi.
+# dettagliato (carbone/gas/petrolio) + quello già esistente per l'elettricità. "Solare" riusa
+# il verde di "Rinnovabili" perché le due non compaiono mai insieme (alternative dello stesso
+# radio "Semplice/Dettagliato"). "Altre rinnovabili" ha invece un colore TUTTO SUO (periwinkle,
+# fuori dalla palette Okabe-Ito): compare nella stessa vista "Dettagliato" insieme a "Fossile"
+# aggregato (mix elettrico) e a tutte le altre 8 tinte (energia primaria) — riusare il grigio di
+# "Fossile" qui li rendeva indistinguibili nello stack (bug osservato). Niente nero puro per il
+# carbone: Streamlit ridisegna Plotly con sfondo scuro in dark mode e il nero vi sparisce del
+# tutto — grigio scuro invece, visibile su entrambi i temi.
 SOURCE_COLORS = {
     "Fossile": "#999999", "Carbone": "#595959", "Gas": "#F0E442", "Petrolio": "#D55E00",
     "Nucleare": PALETTE["nucleare"], "Rinnovabili": PALETTE["rinnovabili"],
     "Idroelettrico": "#0072B2", "Eolico": "#56B4E9", "Solare": PALETTE["rinnovabili"],
-    "Bioenergie": "#CC79A7", "Altre rinnovabili": "#999999",
+    "Bioenergie": "#CC79A7", "Altre rinnovabili": "#8DA0CB",
 }
 
 # Esploratore libero: ogni voce è (etichetta, colonna, unità). Raggruppate per tema così
