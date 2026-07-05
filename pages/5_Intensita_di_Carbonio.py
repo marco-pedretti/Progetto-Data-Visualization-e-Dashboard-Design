@@ -1,8 +1,8 @@
 """
-Pagina 5 — Intensità di carbonio (Storia)
+Pagina 5: Intensità di carbonio (Storia)
 ============================================
 Corrisponde al Cap. 4.7 del notebook: l'intensità di carbonio del mix elettrico
-(gCO2eq/kWh) come indicatore di esito, alternativo alle quote di mix — nucleare e
+(gCO2eq/kWh) come indicatore di esito, alternativo alle quote di mix: nucleare e
 rinnovabili sono entrambe fonti a basse emissioni, quindi la sola quota non dice se
 un paese ha davvero ridotto le proprie emissioni. Solo il calcolo corretto (media
 pesata con NaN mascherati) è mostrato qui; il confronto naive-vs-corretto che ha
@@ -45,7 +45,7 @@ def main() -> None:
     st.markdown(
         "Le quote di mix rispondono alla domanda \"di cosa è fatta l'elettricità\", ma nucleare e "
         "rinnovabili sono entrambe fonti a basse emissioni: un paese può ridurre la quota nucleare "
-        "aumentando le rinnovabili senza migliorare — o persino peggiorando — il proprio bilancio "
+        "aumentando le rinnovabili senza migliorare, o persino peggiorando, il proprio bilancio "
         "emissivo reale, se la differenza viene coperta da fossile nel frattempo. "
         "`carbon_intensity_elec` (gCO₂eq/kWh) misura l'esito, non la composizione."
     )
@@ -82,19 +82,19 @@ def main() -> None:
     )
     fig.update_yaxes(rangemode="tozero")
     st.plotly_chart(fig, width="stretch")
-    st.caption(f"{SOURCE_NOTE} — panel bilanciato, righe con carbon_intensity_elec valido")
+    st.caption(f"{SOURCE_NOTE} · panel bilanciato, righe con carbon_intensity_elec valido")
 
     first_year = int(carbon.index.min())
     min_year = int(carbon["panel_bilanciato"].idxmin())
     st.markdown(
         f"L'intensità di carbonio del panel scende in modo pressoché continuo da "
         f"**{carbon['panel_bilanciato'].loc[first_year]:.0f} gCO₂/kWh ({first_year}) a "
-        f"{carbon['panel_bilanciato'].loc[min_year]:.0f} ({min_year})** — quasi dimezzata — "
+        f"{carbon['panel_bilanciato'].loc[min_year]:.0f} ({min_year})** (quasi dimezzata), "
         "validata dal confronto con l'aggregato \"Europe\" pubblicato direttamente da OWID "
         "(linea tratteggiata, che coincide entro l'1-2% dal 2000 in poi). L'unica interruzione è "
         f"il **{last_year}** ({carbon['panel_bilanciato'].loc[min_year]:.0f} → "
         f"{carbon['panel_bilanciato'].loc[last_year]:.0f}): non un'inversione di tendenza ma uno "
-        "shock di un solo anno — la produzione nucleare francese è scesa di circa un quinto per le "
+        "shock di un solo anno: la produzione nucleare francese è scesa di circa un quinto per le "
         "ispezioni sulla corrosione da stress dei reattori, mentre la siccità ha ridotto "
         "l'idroelettrico nel panel; la differenza è stata coperta da fossile."
     )
@@ -135,14 +135,14 @@ def main() -> None:
                 showlegend=False, hoverinfo="skip",
             ))
     fig2.update_layout(
-        title=f"r = {corr_fc:.2f} — ma a parità di quota fossile l'intensità varia ancora",
+        title=f"r = {corr_fc:.2f} – ma a parità di quota fossile l'intensità varia ancora",
         xaxis_title="Quota fossile (%)", yaxis_title="Intensità di carbonio (gCO₂/kWh)",
         template="plotly_white", height=480,
     )
     fig2.update_xaxes(range=[0, 100])
     fig2.update_yaxes(rangemode="tozero")
     st.plotly_chart(fig2, width="stretch")
-    st.caption(f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, {last_year}")
+    st.caption(f"{SOURCE_NOTE} · panel bilanciato, 33 paesi, {last_year}")
 
     # Numeri ricalcolati dai dati, non scritti a mano (convenzione della dashboard): il confronto
     # Germania/Paesi Bassi è il fulcro della pagina, deve restare vero se il dato cambia.
@@ -156,7 +156,7 @@ def main() -> None:
             f"La correlazione è fortissima (**r = {corr_fc:.2f}**): la quota fossile spiega la quasi "
             "totalità della varianza dell'intensità di carbonio. Ma le due metriche non sono "
             f"intercambiabili: **Germania** ({de_f:.1f}% fossile, {de_i:.0f} gCO₂/kWh) e **Paesi Bassi** "
-            f"({nl_f:.1f}% fossile, {nl_i:.0f} gCO₂/kWh) hanno quote fossili simili — {confronto} — ma "
+            f"({nl_f:.1f}% fossile, {nl_i:.0f} gCO₂/kWh) hanno quote fossili simili ({confronto}) ma "
             "un'intensità molto diversa, perché il mix fossile non è omogeneo: il carbone (in "
             "particolare la lignite tedesca) emette più del gas naturale (dominante nel mix olandese) "
             "a parità di quota di generazione. La quota fossile dice *quanto* fossile c'è; l'intensità "

@@ -32,13 +32,13 @@ PALETTE = {"fossile": "#999999", "nucleare": "#E69F00", "rinnovabili": "#009E73"
 SOURCE_NOTE = "Fonte: OWID Energy Dataset (Ember; Energy Institute)"
 
 # Colore per i punti "evidenziati" negli scatter (paesi di riferimento/eccezione): blu Okabe-Ito,
-# NON PALETTE["calo"] (vermillion), che in tutta la dashboard significa "calo/anomalia" — i punti
+# NON PALETTE["calo"] (vermillion), che in tutta la dashboard significa "calo/anomalia": i punti
 # evidenziati non sono anomalie, sono solo riferimenti. Condiviso tra le pagine con scatter
 # (Intensità di carbonio, Chi sostituisce chi) così l'evidenza ha sempre lo stesso significato.
 HIGHLIGHT_COUNTRY = "#0072B2"
 
 # Import/export netto: il segno è una direzione (chi compra vs chi vende elettricità), non un
-# giudizio di merito — niente verde/rosso ("buono/cattivo" fuori luogo qui). Due toni tenui,
+# giudizio di merito: niente verde/rosso ("buono/cattivo" fuori luogo qui). Due toni tenui,
 # distinti per tonalità (ambra vs blu, non solo per luminosità) così restano leggibili anche in
 # scala di grigi o per un daltonico, e abbastanza chiari da non sparire sullo sfondo scuro.
 # L'ambra va sull'import, non sull'export: un tono caldo sui valori negativi (l'export è la barra
@@ -71,7 +71,7 @@ IT_NAME = {
 }
 
 # Cap. 4.8: i 5 paesi isolati in 4.6 come eccezione (calo nucleare concomitante alla crescita
-# rinnovabile), con l'evento politico che spiega il declino — anno e didascalia verificati contro
+# rinnovabile), con l'evento politico che spiega il declino: anno e didascalia verificati contro
 # il picco/valore 2022 reale di nuclear_share_elec, non solo affermati.
 NUCLEAR_EVENTS = {
     "Lithuania": (2009, "Chiusura Ignalina (UE)"),
@@ -86,7 +86,7 @@ NUCLEAR_EVENTS = {
 # ma pesantemente right-censored fuori Europa (~90 paesi su 220). In precedenza il range era
 # ristretto a 2000-2024 proprio per evitare troppi paesi "grigi silenziosi"; ora che il dato
 # mancante ha un indicatore esplicito e consistente (vedi MAP_NO_DATA_COLOR), l'intero range è
-# mostrabile onestamente — la sparsità diventa informazione (es. carbon_intensity_elec non esiste
+# mostrabile onestamente: la sparsità diventa informazione (es. carbon_intensity_elec non esiste
 # per NESSUN paese nel 1985: la mappa sarà tutta "nessun dato", correttamente).
 WORLD_YEAR_START = 1985
 WORLD_YEAR_END = 2025
@@ -101,7 +101,7 @@ MAP_NO_DATA_COLOR = "#8A7CA8"
 
 # Metriche disponibili per la mappa (solo settore elettrico, non emissioni economy-wide):
 # scala colore a tinta unica coerente con PALETTE per le tre fonti, YlOrRd per l'intensità
-# di carbonio (sequenziale: più scuro = più emissioni — NON RdYlGn_r come il prezzo Airbnb
+# di carbonio (sequenziale: più scuro = più emissioni; NON RdYlGn_r come il prezzo Airbnb
 # in altri_file: rosso-verde è il caso classico di daltonismo e contraddirebbe la scelta
 # Okabe-Ito dichiarata in Home), Blues per la generazione totale (grandezza neutra).
 MAP_METRICS = {
@@ -246,7 +246,7 @@ def limit_page_width(max_px: int = 1200) -> None:
     eccessivamente testo e grafici; questo helper applica un max-width via CSS scoped alla
     pagina che lo chiama (lo stile iniettato da st.markdown sparisce navigando altrove, perché
     ogni pagina multipage è uno script eseguito da zero). Il selettore data-testid dipende
-    dai nomi interni di Streamlit — per questo la versione è pinnata in requirements.txt.
+    dai nomi interni di Streamlit: per questo la versione è pinnata in requirements.txt.
     """
     st.markdown(
         f"""

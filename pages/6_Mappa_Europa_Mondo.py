@@ -1,16 +1,16 @@
 """
-Pagina 6 — Mappa Europa/Mondo (Esplora)
+Pagina 6: Mappa Europa/Mondo (Esplora)
 ==========================================
 Coropleta interattiva del mix elettrico: ambito (Europa/Mondo), metrica e anno
 scelti liberamente, con KPI ricalcolati sullo scope selezionato. Solo variabili
 del settore elettrico (quote fossile/nucleare/rinnovabili, intensità di carbonio,
-generazione totale) — non emissioni economy-wide, per restare coerenti col tema
+generazione totale); non emissioni economy-wide, per restare coerenti col tema
 del progetto (scelta esplicita dell'utente).
 
 I paesi senza dato per la metrica/anno scelti sono colorati in modo esplicito e fisso
-(lavanda, `MAP_NO_DATA_COLOR`), indipendente dalla metrica/scala scelta — non è un errore
+(lavanda, `MAP_NO_DATA_COLOR`), indipendente dalla metrica/scala scelta: non è un errore
 da correggere, è la stessa distinzione strutturale del Cap. 3 del notebook (la copertura
-fuori Europa è molto più eterogenea — always-null, right-censoring), qui resa esplicita
+fuori Europa è molto più eterogenea, always-null, right-censoring), qui resa esplicita
 invece di affidata al grigio di default di Plotly (che si confonderebbe con l'estremo
 chiaro di scale come "Greys").
 
@@ -43,9 +43,10 @@ world = get_world_data()
 def main() -> None:
     st.title("🗺️ Mappa Europa/Mondo")
     st.markdown(
-        "Scegli ambito, metrica e anno (slider in fondo). I paesi in **lavanda** non hanno un dato "
-        "disponibile per quella combinazione — non è un errore, è la stessa distinzione strutturale "
-        "vista nel Cap. 3 del notebook (la copertura fuori Europa è molto più eterogenea)."
+        "Ambito, metrica e anno selezionabili liberamente (slider in fondo). I paesi in **lavanda** "
+        "non hanno un dato disponibile per quella combinazione: non è un errore, è la stessa "
+        "distinzione strutturale vista nel Cap. 3 del notebook (la copertura fuori Europa è molto "
+        "più eterogenea)."
     )
 
     limit_page_width()
@@ -127,7 +128,7 @@ def main() -> None:
     # Due tracce sovrapposte invece di una sola: la prima copre l'intero ambito con il colore
     # fisso "nessun dato" (universo = tutti i paesi mai comparsi in questo ambito, non solo
     # quelli del solo anno selezionato); la seconda disegna sopra, con la scala della metrica,
-    # solo i paesi che hanno davvero un valore quest'anno — dove manca, resta visibile lo strato
+    # solo i paesi che hanno davvero un valore quest'anno: dove manca, resta visibile lo strato
     # sottostante. Un colore fisso indipendente dalla metrica (MAP_NO_DATA_COLOR) rende "nessun
     # dato" sempre riconoscibile allo stesso modo, invece del grigio di default di Plotly che si
     # confonde con l'estremo chiaro di scale come "Greys".
@@ -153,7 +154,7 @@ def main() -> None:
         ))
     fig.update_geos(scope="europe" if scope == "Europa" else "world")
     fig.update_layout(
-        title=f"{metric_label} — {year}", template="plotly_white",
+        title=f"{metric_label} – {year}", template="plotly_white",
         height=600, margin=dict(l=0, r=0, t=40, b=0),
     )
     # I trace Choropleth non hanno una voce di legenda "a swatch" come scatter/bar (il colore è

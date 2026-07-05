@@ -1,5 +1,5 @@
 """
-Pagina 9 — Firme storiche nei dati (Storia)
+Pagina 9: Firme storiche nei dati (Storia)
 ==============================================
 Corrisponde al Cap. 3.4 del notebook: la censura a sinistra di `electricity_generation`
 come indicatore geopolitico. Inizialmente esclusa dalla dashboard (2026-07-03, "EDA non
@@ -8,7 +8,7 @@ di storytelling sui dati stessi.
 
 Racconta la versione VERIFICATA della tesi, non quella del PDF esterno che l'ha ispirata:
 il PDF leggeva il 1985 come firma del blocco post-sovietico, ma nei dati 31 dei 40 paesi
-europei partono tutti nel 1985 (Francia, Germania e Italia incluse) — è il floor con cui
+europei partono tutti nel 1985 (Francia, Germania e Italia incluse): è il floor con cui
 la fonte inizia a pubblicare la colonna, non un segnale storico. La firma vera è lo
 scaglionamento successivo (1990/2000/2005), che ricalca la dissoluzione jugoslava.
 
@@ -56,7 +56,7 @@ def timeline_figure(bounds: pd.DataFrame) -> go.Figure:
 
     Le eccezioni colorate in alto (2005 → 2000 → 1990); del blocco 1985 restano come
     righe singole solo Ucraina e Islanda (le uniche con la serie tronca, per ragioni
-    opposte) — gli altri paesi, tutti identici 1985–ultimo anno, sono raggruppati in
+    opposte); gli altri paesi, tutti identici 1985–ultimo anno, sono raggruppati in
     un'unica riga: 31 barre grigie uguali erano rumore, una sola dice lo stesso.
     """
     late = bounds[bounds["first"] > 1985]
@@ -101,7 +101,7 @@ def timeline_figure(bounds: pd.DataFrame) -> go.Figure:
     fig.add_vline(x=1985, line_dash="dot", line_color="#888888", line_width=1)
     fig.add_annotation(
         x=1985, y=1.0, yref="paper", yanchor="bottom",
-        text="1985 — inizio pubblicazione della fonte",
+        text="1985: inizio pubblicazione della fonte",
         showarrow=False, xanchor="left", font=dict(size=10, color="#888888"),
     )
 
@@ -110,7 +110,7 @@ def timeline_figure(bounds: pd.DataFrame) -> go.Figure:
     # (per questo partono da y=-0.16, sotto la fascia dei tick); la riunificazione
     # tedesca è ancorata a destra così il testo occupa la zona vuota pre-1990.
     # xshift: scostamento orizzontale in PIXEL della sola etichetta (positivo = destra),
-    # la linea resta su x — è la manopola per aggiustare a occhio le posizioni.
+    # la linea resta su x: è la manopola per aggiustare a occhio le posizioni.
     events = [
         (1990, -0.16, "right", 35, "1990 · riunificazione tedesca "),
         (1993, -0.16, "left", 0, " 1993 · divorzio di velluto cecoslovacco"),
@@ -160,7 +160,7 @@ def main() -> None:
         "Nelle altre pagine i dati mancanti sono un problema da gestire; qui sono il **soggetto**. "
         "La colonna `electricity_generation` non ha nessun buco interno in Europa: una volta "
         "iniziata, ogni serie corre ininterrotta fino all'ultimo anno disponibile. L'informazione "
-        "storica non sta quindi nei buchi, ma in **quando una serie comincia** — e in quando "
+        "storica non sta quindi nei buchi, ma in **quando una serie comincia**, e in quando "
         "finisce. A patto di saper distinguere il segnale storico dall'artefatto della fonte."
     )
 
@@ -171,9 +171,9 @@ def main() -> None:
 
     st.plotly_chart(timeline_figure(bounds), width="stretch")
     st.caption(
-        f"{SOURCE_NOTE} — electricity_generation, copertura Europa ({n_total} paesi), zero gap "
+        f"{SOURCE_NOTE} · electricity_generation, copertura Europa ({n_total} paesi), zero gap "
         "interni: le barre sono continue perché le serie lo sono davvero, non per semplificazione. "
-        "(I buchi interni esistono nel dataset, ma su altre variabili — l'eolico ne ha in 13 paesi, "
+        "(I buchi interni esistono nel dataset, ma su altre variabili: l'eolico ne ha in 13 paesi, "
         "2000-2013, Cap. 3.2 del notebook.) Le serie identiche 1985–2025 sono raggruppate in "
         "un'unica riga (elenco completo al passaggio del mouse); Ucraina e Islanda restano singole "
         "perché la loro serie si interrompe prima."
@@ -183,13 +183,13 @@ def main() -> None:
     st.markdown(
         f"La tentazione narrativa è leggere il 1985 come la firma del blocco post-sovietico: Russia, "
         f"Ucraina, i tre Baltici partono tutti lì. Ma è una trappola: **{n_1985} dei {n_total} paesi "
-        f"europei** partono nel 1985 — comprese Francia, Germania, Italia, Regno Unito e tutta "
+        f"europei** partono nel 1985, comprese Francia, Germania, Italia, Regno Unito e tutta "
         f"l'Europa occidentale. Il 1985 è il *floor* con cui la fonte (Energy Institute) inizia a "
         f"pubblicare questa colonna per l'intero continente, non un evento storico. Il dato \"1985\" "
         f"di Russia, Baltici, Cechia e Slovacchia è anzi una **retropolazione**: i confini attuali "
         f"proiettati all'indietro, *prima* che quegli Stati esistessero (l'URSS si dissolve nel "
         f"dicembre 1991, il divorzio di velluto è del gennaio 1993). Persino la riunificazione "
-        f"tedesca (ottobre 1990) è invisibile: la Germania è una serie unica e continua dal 1985 — "
+        f"tedesca (ottobre 1990) è invisibile: la Germania è una serie unica e continua dal 1985: "
         f"le voci *East Germany* e *West Germany* esistono nel dataset, ma senza un solo valore di "
         f"generazione."
     )
@@ -201,16 +201,16 @@ def main() -> None:
     st.markdown(
         f"Il segnale storico sta nelle **{len(late)} eccezioni**, e nel loro ordine: **1990** "
         f"({g1990}), **2000** ({g2000}), **2005** ({g2005}). La sequenza ricalca da vicino la "
-        f"disgregazione jugoslava — Slovenia, Croazia e Macedonia del Nord (indipendenze 1991) "
+        f"disgregazione jugoslava: Slovenia, Croazia e Macedonia del Nord (indipendenze 1991) "
         f"partono nel 1990; la Bosnia, devastata dalla guerra 1992-95, solo dal 2000; il Montenegro "
-        f"(indipendenza 2006) dal 2005 — sempre **dopo** l'evento politico, mai prima: costruire un "
+        f"(indipendenza 2006) dal 2005; sempre **dopo** l'evento politico, mai prima: costruire un "
         f"sistema statistico nazionale richiede anni. Due avvertenze da onestà intellettuale: "
         f"**Malta** è nel gruppo 1990 per pura coincidenza di copertura (nessun legame jugoslavo), "
         f"e la **Moldova** (ex URSS, non ex Jugoslavia) condivide la soglia 2000 con Bosnia e "
-        f"Albania — il raggruppamento è per anno, non per causa comune. Anche il **Kosovo** parte "
+        f"Albania: il raggruppamento è per anno, non per causa comune. Anche il **Kosovo** parte "
         f"dal 2000, ma vive nel dataset con un codice non-ISO (sovranità contesa) e resta fuori "
         f"dal conteggio dei {n_total}. Infine, il rovescio metodologico: se i buchi *interni* non "
-        f"esistono è perché le fonti li hanno chiusi a monte con stime e retropolazioni — la forma "
+        f"esistono è perché le fonti li hanno chiusi a monte con stime e retropolazioni: la forma "
         f"dell'assenza è modellata dalle scelte editoriali, non solo dalla storia."
     )
 
@@ -224,13 +224,13 @@ def main() -> None:
     st.markdown(
         f"La censura funziona anche a destra. L'**Ucraina** è ferma al **{ukr_last}**: non un "
         f"ritardo di pubblicazione ma la guerra, che investe anche il sistema statistico di un "
-        f"paese. {others_txt} sono invece ordinari ritardi di pubblicazione — in tabella le due "
+        f"paese. {others_txt} sono invece ordinari ritardi di pubblicazione; in tabella le due "
         f"assenze sono identiche, le cause opposte: il dato mancante va sempre interrogato, mai "
         f"solo contato. Ultima firma, la più silenziosa: *USSR* ({ghost_counts['USSR']} righe), "
         f"*Yugoslavia* ({ghost_counts['Yugoslavia']}) e *Serbia and Montenegro* "
         f"({ghost_counts['Serbia and Montenegro']}) **esistono** ancora nel dataset come entità, "
         f"ma senza un solo valore di generazione elettrica: righe segnaposto di Stati che non ci "
-        f"sono più — lapidi statistiche."
+        f"sono più: lapidi statistiche."
     )
 
 

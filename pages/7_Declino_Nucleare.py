@@ -1,9 +1,9 @@
 """
-Pagina 7 — Declino del nucleare (Storia)
+Pagina 7: Declino del nucleare (Storia)
 ============================================
 Corrisponde al Cap. 4.8 del notebook: i cinque paesi già isolati in "Chi sostituisce
-chi" (Cap. 4.6) come eccezione — dove il calo del nucleare coincide con la crescita
-rinnovabile, non con il fossile — mostrano ciascuno un picco storico seguito da un
+chi" (Cap. 4.6) come eccezione (dove il calo del nucleare coincide con la crescita
+rinnovabile, non con il fossile) mostrano ciascuno un picco storico seguito da un
 evento politico preciso, non un trend generico. Serie estesa dal 1985 (non il solo
 panel bilanciato 1990-2022): per Belgio e Lituania il picco storico cade a ridosso o
 prima di quella soglia.
@@ -15,7 +15,7 @@ scansionabile a colpo d'occhio.
 
 Nessuna libertà di personalizzazione: narrazione e cinque paesi sono fissi. A
 differenza di "Cinque strategie nazionali", qui gli eventi politici sono cablati per
-paese — sostituire uno slot con un altro paese romperebbe la narrazione, non la
+paese: sostituire uno slot con un altro paese romperebbe la narrazione, non la
 arricchirebbe.
 """
 
@@ -36,7 +36,7 @@ IT_NAME = {
     "Belgium": "Belgio", "France": "Francia",
 }
 # Grigio medio semitrasparente: legge come "tempo trascorso" (non come una fonte) e resta
-# visibile sia su sfondo scuro sia chiaro — a bassa opacità sparirebbe nel nero della dark mode.
+# visibile sia su sfondo scuro sia chiaro: a bassa opacità sparirebbe nel nero della dark mode.
 LAG_BAND = "rgba(150, 152, 165, 0.34)"
 
 
@@ -80,8 +80,8 @@ def main() -> None:
     st.markdown(
         "La pagina **Chi sostituisce chi** isola un piccolo gruppo di paesi dove il calo del "
         "nucleare *coincide* con la crescita rinnovabile: Germania, Lituania, Svezia, Francia e "
-        "Belgio. Per ciascuno la domanda naturale è **quando** è iniziato il declino e **perché** "
-        "— non solo quanto è cambiata la quota. La risposta ricorrente è che il **picco** (tecnico) "
+        "Belgio. Per ciascuno la domanda naturale è **quando** è iniziato il declino e **perché**, "
+        "non solo quanto è cambiata la quota. La risposta ricorrente è che il **picco** (tecnico) "
         "e l'**evento politico** che avvia il crollo non coincidono mai: tra i due passano dai 9 ai "
         "17 anni (la banda grigia in ogni riquadro)."
     )
@@ -155,7 +155,7 @@ def main() -> None:
         title="Ogni declino nucleare ha un evento preciso, non è un trend generico",
     )
     st.plotly_chart(fig, width="stretch")
-    st.caption(f"{SOURCE_NOTE} — quota % della generazione, serie estesa dal 1985 (non solo il panel bilanciato)")
+    st.caption(f"{SOURCE_NOTE} · quota % della generazione, serie estesa dal 1985 (non solo il panel bilanciato)")
 
     st.subheader("Il divario tra picco ed evento")
     st.markdown(
@@ -169,15 +169,15 @@ def main() -> None:
         "Il picco e l'evento non coincidono mai: la **Lituania** tocca l'88% nel 1993 (Ignalina, "
         "eredità sovietica, unica centrale del paese) ma il declino a zero avviene solo dopo la "
         "chiusura definitiva del secondo reattore nel 2009, imposta come condizione di adesione "
-        "all'UE — sedici anni dopo il picco. La **Germania** picca al 31.2% nel 1997, ben prima di "
-        "Fukushima (2011): l'uscita dal nucleare non è la causa del declino ma la sua accelerazione "
-        "— l'ultimo reattore si è fermato nell'aprile 2023, pochi mesi dopo il 2022 con cui chiude "
+        "all'UE, sedici anni dopo il picco. La **Germania** picca al 31.2% nel 1997, ben prima di "
+        "Fukushima (2011): l'uscita dal nucleare non è la causa del declino ma la sua accelerazione: "
+        "l'ultimo reattore si è fermato nell'aprile 2023, pochi mesi dopo il 2022 con cui chiude "
         "questo pannello. **Svezia** e **Belgio** mostrano il pattern più lento: entrambi i declini "
         "seguono leggi di phase-out (Svezia dopo il referendum del 1980, chiusure Barsebäck 1999 e "
         "2005; Belgio con la legge del 2003) ma restano rispettivamente al 30% e al 46.5% ancora nel "
-        "2022 — un phase-out annunciato non è un crollo immediato. La **Francia**, infine, è il caso "
+        "2022: un phase-out annunciato non è un crollo immediato. La **Francia**, infine, è il caso "
         "più lento di tutti: picca nel 2006 (79.4%) e nel 2022 è ancora al 62.9%, nonostante la "
-        "legge del 2015 avesse fissato un obiettivo del 50% mai raggiunto — il calo puntuale del "
+        "legge del 2015 avesse fissato un obiettivo del 50% mai raggiunto: il calo puntuale del "
         "2022 (vedi la pagina **Intensità di carbonio**) è dovuto a un evento congiunturale "
         "(corrosione, siccità), non alla legge."
     )

@@ -1,5 +1,5 @@
 """
-Pagina 4 — Chi sostituisce chi (Storia)
+Pagina 4: Chi sostituisce chi (Storia)
 ==========================================
 Corrisponde ai Cap. 4.4 e 4.6 del notebook: ranking "chi ha trasformato di più il
 mix" e scatter di correlazione Δrinnovabili vs Δfossile/Δnucleare sui 33 paesi del
@@ -53,14 +53,14 @@ def main() -> None:
     )
     fig.update_layout(height=900, showlegend=False)
     st.plotly_chart(fig, width="stretch")
-    st.caption(f"{SOURCE_NOTE} — panel bilanciato, {year_start} vs {year_end}")
+    st.caption(f"{SOURCE_NOTE} · panel bilanciato, {year_start} vs {year_end}")
 
     min_row = deltas.loc[deltas["d_renewables"].idxmin()]
     if min_row["d_renewables"] < 0:
         if min_row["start_renewables"] >= 95:
             st.markdown(
                 f"Il solo caso in calo è la **{min_row['country']}** ({min_row['d_renewables']:.1f} p.p.): "
-                f"non è una regressione, è un **effetto soffitto** — era già al "
+                f"non è una regressione, è un **effetto soffitto**: era già al "
                 f"{min_row['start_renewables']:.1f}% nel {year_start}, quindi non aveva margine di crescita."
             )
         else:
@@ -77,7 +77,7 @@ def main() -> None:
             f"perché sia rimasta ferma, ma perché nel {year_start} partiva già da un mix a basse emissioni "
             f"grazie al nucleare ({fr['start_nuclear']:.0f}% di quota): una metrica di sola \"variazione "
             "quota rinnovabili\" penalizza chi ha scelto una strada diversa per lo stesso obiettivo di "
-            "decarbonizzazione — va sempre letta insieme al punto di partenza."
+            "decarbonizzazione: va sempre letta insieme al punto di partenza."
         )
 
     st.divider()
@@ -89,7 +89,7 @@ def main() -> None:
     )
 
     # Eccezione al pattern dominante ("le rinnovabili sostituiscono il fossile"): i paesi in cui,
-    # nell'intervallo scelto, è il NUCLEARE — più del fossile — ad aver ceduto quota mentre le
+    # nell'intervallo scelto, è il NUCLEARE, più del fossile, ad aver ceduto quota mentre le
     # rinnovabili crescevano. Calcolata dai dati, non una lista fissa: così resta vera al variare
     # degli anni e coincide con i punti evidenziati. Δnuc < -5 p.p. esclude i cali trascurabili;
     # |Δnuc| > |Δfos| isola i casi dove il nucleare è il bersaglio, non un comprimario (altrimenti
@@ -108,7 +108,7 @@ def main() -> None:
     # Declutter etichette: alterno alto/basso secondo il rango sull'asse x (Δrinnovabili), così due
     # paesi-eccezione con Δ simili (es. Spagna e Belgio, quasi coincidenti) finiscono uno sopra e uno
     # sotto invece di accavallarsi. Deterministico e indipendente dagli anni (il set cambia con lo slider),
-    # quindi non serve — e non sarebbe possibile — assegnare le posizioni a mano come nella pagina 5.
+    # quindi non serve, e non sarebbe possibile, assegnare le posizioni a mano come nella pagina 5.
     exc_rows = deltas[is_exc]
     xrank = exc_rows["d_renewables"].rank(method="first").astype(int)
     pos_map = dict(zip(exc_rows["country"], ["top center" if r % 2 else "bottom center" for r in xrank]))
@@ -140,7 +140,7 @@ def main() -> None:
         col.plotly_chart(fig, width="stretch")
 
     st.caption(
-        f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, variazione quote {year_start} vs {year_end}. "
+        f"{SOURCE_NOTE} · panel bilanciato, 33 paesi, variazione quote {year_start} vs {year_end}. "
         "In blu i paesi-eccezione (calo di nucleare maggiore del calo di fossile)."
     )
 
@@ -164,8 +164,8 @@ def main() -> None:
 
     if exc_it:
         testo_ecc = (
-            f"L'eccezione — i paesi in cui è il nucleare, **più del fossile**, ad aver ceduto quota "
-            f"mentre le rinnovabili crescevano — è **{_join_it(exc_it)}** ({len(exc_it)} su 33). "
+            f"L'eccezione (i paesi in cui è il nucleare, **più del fossile**, ad aver ceduto quota "
+            f"mentre le rinnovabili crescevano) è **{_join_it(exc_it)}** ({len(exc_it)} su 33). "
         )
         if noted:
             testo_ecc += "Ragioni specifiche a ciascuno: " + "; ".join(noted) + ". "
@@ -180,7 +180,7 @@ def main() -> None:
         "dei 33 paesi il nucleare non era presente o è rimasto stabile, e la crescita delle rinnovabili "
         "ha eroso soprattutto quota fossile. "
         + testo_ecc
-        + "Nel resto del panel — **Italia** inclusa, che di nucleare non ne ha — a cedere terreno è il "
+        + "Nel resto del panel (**Italia** inclusa, che di nucleare non ne ha) a cedere terreno è il "
         "fossile, non il nucleare."
     )
 

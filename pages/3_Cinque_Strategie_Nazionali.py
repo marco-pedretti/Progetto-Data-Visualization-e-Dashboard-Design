@@ -1,5 +1,5 @@
 """
-Pagina 3 — Strategie nazionali a confronto (Esplora)
+Pagina 3: Strategie nazionali a confronto (Esplora)
 =======================================================
 Confronto libero tra due e quattro paesi (default testa-a-testa). Eredita dal vecchio
 "Cinque strategie nazionali" (Cap. 4.3) l'idea che la media europea nasconda traiettorie
@@ -10,10 +10,10 @@ La pagina alterna due registri, e adatta il numero di colonne ai paesi scelti (2
 - sezioni **a colonne** (una per paese) per ciò che si legge meglio in parallelo ma non si
   può sovrapporre: lo scoreboard KPI, la composizione impilata del mix (stack di paesi
   diversi non stanno sullo stesso grafico) e l'import/export elettrico (qui il colore è il
-  segno — importatore/esportatore — non il paese, coerente con Scheda Paese);
+  segno, importatore/esportatore, non il paese, coerente con Scheda Paese);
 - una sezione **unificata** (una linea per paese sullo stesso asse) per le metriche scalari-per-anno,
-  dove la sovrapposizione diretta è proprio il confronto — con un selettore di metrica che
-  è la parte di esplorazione libera vera e propria — più la crescita di una fonte nel tempo
+  dove la sovrapposizione diretta è proprio il confronto, con un selettore di metrica che
+  è la parte di esplorazione libera vera e propria, più la crescita di una fonte nel tempo
   (valore assoluto o indice 1990 = 100, ex pagina "Velocità di crescita" confluita qui: la
   crescita è un dato come gli altri, non una lezione a sé).
 
@@ -40,7 +40,7 @@ from common import (
 
 # Identità dei paesi nei grafici unificati (Confronto diretto, Crescita): 4 tinte Okabe-Ito ad
 # alto contrasto reciproco. Rosa e azzurro cielo (prima versione) sono stati sostituiti perché
-# troppo simili/deboli accanto a blu e vermiglio (feedback utente 2026-07-04) — questo quartetto
+# troppo simili/deboli accanto a blu e vermiglio (feedback utente 2026-07-04); questo quartetto
 # (blu/vermiglio/verde/giallo) è il sottoinsieme Okabe-Ito con la massima separazione percettiva
 # reciproca. Il verde riprende la tinta di PALETTE["rinnovabili"], ma senza ambiguità: questa
 # tupla non compare mai nello stesso grafico delle aree per fonte (mix e import/export usano
@@ -77,7 +77,7 @@ COMPARE_METRICS = {
     "Quota fossile (%)": ("fossil_share_elec", "%", True, False),
     "Quota nucleare (%)": ("nuclear_share_elec", "%", True, False),
     "Quota rinnovabili (%)": ("renewables_share_elec", "%", True, False),
-    "Quota low-carbon — nucleare + rinnovabili (%)": ("low_carbon_share_elec", "%", True, False),
+    "Quota low-carbon: nucleare + rinnovabili (%)": ("low_carbon_share_elec", "%", True, False),
     "Elettricità pro-capite (kWh)": ("per_capita_electricity", "kWh/persona", False, False),
     "Emissioni pro-capite, settore elettrico (t CO₂eq)": ("ghg_per_capita_elec", "t CO₂eq/persona", False, False),
     "Generazione totale (TWh)": ("electricity_generation", "TWh", False, True),
@@ -186,14 +186,14 @@ def main() -> None:
     st.title("🆚 Strategie nazionali a confronto")
     st.markdown(
         "La media europea nasconde traiettorie opposte: chi ha puntato sul nucleare, chi sulle "
-        "rinnovabili, chi è ancora legato al fossile. Scegli **da due a quattro paesi** e mettili "
-        "a confronto — prima i numeri chiave, poi i mix affiancati, poi il confronto diretto su una "
-        "metrica a tua scelta e la crescita di una fonte nel tempo."
+        "rinnovabili, chi è ancora legato al fossile. Selezione libera di due-quattro paesi: numeri "
+        "chiave, mix affiancati, confronto diretto su una metrica a scelta e crescita di una fonte "
+        "nel tempo."
     )
 
     # Svizzera e Islanda sono incluse qui (a differenza del panel bilanciato usato altrove
     # nell'app): il confronto è tra paesi scelti esplicitamente dall'utente, non un aggregato
-    # europeo, quindi le serie incomplete 1990-2022 non alterano nessuna media — sono solo due
+    # europeo, quindi le serie incomplete 1990-2022 non alterano nessuna media: sono solo due
     # profili estremi in più tra cui scegliere (Svizzera nucleare+idro, Islanda 100% rinnovabile).
     data = _with_derived(get_extended_panel(EXTRA_COUNTRIES))
     options = sorted(data["country"].unique())
@@ -202,8 +202,8 @@ def main() -> None:
         "Paesi da confrontare (da 2 a 4)", options, default=["France", "Germany"],
         max_selections=4,
         help=(
-            "Il caso base è il testa-a-testa; puoi aggiungere fino a 4 paesi — la pagina adatta le "
-            "colonne. Include anche Svizzera e Islanda, escluse altrove per serie incomplete."
+            "Il caso base è il testa-a-testa; fino a 4 paesi, la pagina adatta le colonne di "
+            "conseguenza. Include anche Svizzera e Islanda, escluse altrove per serie incomplete."
         ),
     )
     if len(selected) < 2:
@@ -220,7 +220,7 @@ def main() -> None:
     # sezioni di confronto comune restano comunque a UNIFIED_PX grazie al wrapper "fw_…".
     limit_page_width(max(PAGE_MIN, len(series) * COL_PX))
 
-    # --- Scoreboard: una colonna per paese ---
+    # Scoreboard: una colonna per paese
     st.subheader("Scheda sintetica")
     st.caption("Valore al 2022 e variazione dal primo anno disponibile (di norma il 1990). Freccia verde = miglioramento.")
     for (country, d_c, _), col in zip(series, st.columns(len(series), border=True)):
@@ -229,7 +229,7 @@ def main() -> None:
 
     st.divider()
 
-    # --- Composizione del mix: una colonna per paese, stessa scala ---
+    # Composizione del mix: una colonna per paese, stessa scala
     st.subheader("Composizione del mix elettrico")
     mode = st.radio(
         "Come rappresentare il mix", ["Quota (%)", "Composizione (TWh)"], horizontal=True,
@@ -238,15 +238,15 @@ def main() -> None:
     for (country, d_c, _), col in zip(series, st.columns(len(series), border=True)):
         with col:
             st.plotly_chart(mix_figure(d_c, country, mode), width="stretch")
-    st.caption(f"{SOURCE_NOTE} — quote fossile/nucleare/rinnovabili, 1990–2022")
+    st.caption(f"{SOURCE_NOTE} · quote fossile/nucleare/rinnovabili, 1990–2022")
 
     st.divider()
 
-    # --- Import/export elettrico: una colonna per paese, colore = segno (non paese) ---
+    # Import/export elettrico: una colonna per paese, colore = segno (non paese)
     st.subheader("Import ed export elettrico")
     st.markdown(
         "Import netto sul fabbisogno elettrico: **ambra** = anno da importatore netto, **blu** = "
-        "anno da esportatore netto. Qui il colore segnala una direzione, non una prestazione — un "
+        "anno da esportatore netto. Qui il colore segnala una direzione, non una prestazione: un "
         "paese può alternare le due condizioni negli anni."
     )
     any_imports = False
@@ -259,11 +259,11 @@ def main() -> None:
             else:
                 st.info(f"Nessun dato di import/export per {country}.")
     if any_imports:
-        st.caption(f"{SOURCE_NOTE} — import netto in % del fabbisogno elettrico, 1990–2022")
+        st.caption(f"{SOURCE_NOTE} · import netto in % del fabbisogno elettrico, 1990–2022")
 
     st.divider()
 
-    # --- Confronto diretto su una metrica: sezione unificata (larghezza fissa UNIFIED_PX) ---
+    # Confronto diretto su una metrica: sezione unificata (larghezza fissa UNIFIED_PX)
     with st.container(key="fw_confronto"):
         st.subheader("Confronto diretto")
         st.markdown(
@@ -302,7 +302,7 @@ def main() -> None:
             fig.update_yaxes(rangemode="tozero")
         st.plotly_chart(fig, width="stretch")
 
-        note = f"{SOURCE_NOTE} — panel bilanciato, 1990–2022"
+        note = f"{SOURCE_NOTE} · panel bilanciato, 1990–2022"
         if is_abs:
             note += " · ⚠️ valore assoluto: riflette anche la dimensione del paese, non solo la strategia"
         st.caption(note)
@@ -322,12 +322,12 @@ def main() -> None:
                 parts = " · ".join(f"**{c}** {v:.1f}" for c, v in vals.items())
                 st.markdown(
                     f"Nel **{year}**, {metric_label.split(' (')[0].lower()} ({unit}): {parts}. "
-                    f"Più alto **{hi}**, più basso **{lo}** — divario {vals[hi] - vals[lo]:.1f} {unit}."
+                    f"Più alto **{hi}**, più basso **{lo}**, divario {vals[hi] - vals[lo]:.1f} {unit}."
                 )
 
     st.divider()
 
-    # --- Crescita di una fonte nel tempo: sezione unificata (larghezza fissa UNIFIED_PX) ---
+    # Crescita di una fonte nel tempo: sezione unificata (larghezza fissa UNIFIED_PX)
     with st.container(key="fw_crescita"):
         st.subheader("Crescita di una fonte nel tempo")
         g1, g2 = st.columns([2, 3])
@@ -361,7 +361,7 @@ def main() -> None:
             y_title = "TWh"
             gfig.update_yaxes(rangemode="tozero")  # l'indice no: la sua ancora di lettura è 100, non 0
         gfig.update_layout(
-            title=f"{growth_source} — {'indice di crescita' if as_index else 'valore assoluto (TWh)'}",
+            title=f"{growth_source} – {'indice di crescita' if as_index else 'valore assoluto (TWh)'}",
             yaxis_title=y_title, template="plotly_white", height=440,
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
         )

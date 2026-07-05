@@ -1,12 +1,12 @@
 """
-Pagina 8 — Scheda Paese (Esplora)
+Pagina 8: Scheda Paese (Esplora)
 =====================================
-Vista libera "tutto il possibile" su una singola entità del dataset OWID — un
+Vista libera "tutto il possibile" su una singola entità del dataset OWID: un
 paese, ma anche un aggregato come "World" o "Europe" (mondo incluso, su
 richiesta esplicita dell'utente). A differenza delle altre pagine Esplora
 **non** è vincolata al panel bilanciato: qui l'obiettivo è la profondità su
 un'unica entità, non il confronto tra paesi, quindi non serve una serie
-completa 1990-2022 — ogni grafico mostra semplicemente quanto dato esiste,
+completa 1990-2022: ogni grafico mostra semplicemente quanto dato esiste,
 gap compresi (la stessa lezione sulla censura dei dati del Cap. 3 del
 notebook, qui visibile a scelta su qualunque entità).
 
@@ -15,7 +15,7 @@ rinnovabili": quel confronto è già il tema di mappa, storia e confronti
 altrove nell'app. Questa scheda copre l'intero dataset elettrico/energetico
 OWID (energia primaria, emissioni del settore elettrico, import/export,
 pro-capite) con un esploratore libero a scelta dell'utente, non un percorso
-fisso — coerente con l'idea di lasciare la massima discrezionalità qui
+fisso, coerente con l'idea di lasciare la massima discrezionalità qui
 (scelta esplicita dell'utente).
 """
 
@@ -57,10 +57,10 @@ DETAILED_ENERGY_SHARE = [
 # il verde di "Rinnovabili" perché le due non compaiono mai insieme (alternative dello stesso
 # radio "Semplice/Dettagliato"). "Altre rinnovabili" ha invece un colore TUTTO SUO (periwinkle,
 # fuori dalla palette Okabe-Ito): compare nella stessa vista "Dettagliato" insieme a "Fossile"
-# aggregato (mix elettrico) e a tutte le altre 8 tinte (energia primaria) — riusare il grigio di
+# aggregato (mix elettrico) e a tutte le altre 8 tinte (energia primaria): riusare il grigio di
 # "Fossile" qui li rendeva indistinguibili nello stack (bug osservato). Niente nero puro per il
 # carbone: Streamlit ridisegna Plotly con sfondo scuro in dark mode e il nero vi sparisce del
-# tutto — grigio scuro invece, visibile su entrambi i temi.
+# tutto; grigio scuro invece, visibile su entrambi i temi.
 SOURCE_COLORS = {
     "Fossile": "#999999", "Carbone": "#595959", "Gas": "#F0E442", "Petrolio": "#D55E00",
     "Nucleare": PALETTE["nucleare"], "Rinnovabili": PALETTE["rinnovabili"],
@@ -185,7 +185,7 @@ RAW_COLS_DEFAULT = [
 
 df_raw = load_raw_data().copy()
 # Derivato: OWID non fornisce le emissioni pro-capite del settore elettrico, solo il totale
-# (Mt CO2eq) e la popolazione — si calcola qui una sola volta per riuso sia nei grafici sia
+# (Mt CO2eq) e la popolazione; si calcola qui una sola volta per riuso sia nei grafici sia
 # nel confronto tra paesi. Il .copy() evita di frammentare il DataFrame cachato da
 # load_raw_data() (PerformanceWarning di pandas altrimenti innocua ma rumorosa nei log).
 df_raw["ghg_per_capita_elec"] = df_raw["greenhouse_gas_emissions"] * 1e6 / df_raw["population"]
@@ -193,7 +193,7 @@ df_raw["ghg_per_capita_elec"] = df_raw["greenhouse_gas_emissions"] * 1e6 / df_ra
 ALL_ENTITIES = sorted(df_raw["country"].unique())
 DEFAULT_ENTITY = "Italy"
 # Universo di confronto per il rank/percentile: solo entità con iso_code a 3 lettere, cioè
-# paesi veri — esclude aggregati come "World", "Europe", "European Union (27)", gruppi di
+# paesi veri: esclude aggregati come "World", "Europe", "European Union (27)", gruppi di
 # reddito, ecc. (94 aggregati individuati nel dataset, nessuno ha un iso_code).
 IS_REAL_COUNTRY = df_raw["iso_code"].notna() & (df_raw["iso_code"].str.len() == 3)
 
@@ -235,7 +235,7 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, series_specs: list, unit: str
 
     series_specs è una lista di (label, col): con una sola metrica si può affiancare Europa/Mondo
     come riferimento; con due metriche il grafico è un confronto interno all'entità (es. domanda vs
-    produzione) sullo stesso asse — mai un doppio asse, per questo le due metriche devono condividere
+    produzione) sullo stesso asse, mai un doppio asse, per questo le due metriche devono condividere
     l'unità di misura (garantito da chi chiama).
     """
     two = len(series_specs) > 1
@@ -263,7 +263,7 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, series_specs: list, unit: str
 
     base = f"{series_specs[0][0]} vs {series_specs[1][0]}" if two else series_specs[0][0]
     y_title = "% anno su anno" if show_yoy else unit
-    title = f"{base} — variazione % anno su anno — {entity}" if show_yoy else f"{base} — {entity}"
+    title = f"{base} – variazione % anno su anno – {entity}" if show_yoy else f"{base} – {entity}"
 
     fig.update_layout(
         title=title, yaxis_title=y_title, template="plotly_white",
@@ -274,7 +274,7 @@ def trend_figure(d_idx: pd.DataFrame, entity: str, series_specs: list, unit: str
 
 
 # Unità "di grandezza" (non normalizzate): per queste il rank tra paesi misura soprattutto la
-# dimensione del paese, non una performance — va detto accanto al percentile, stessa logica delle
+# dimensione del paese, non una performance: va detto accanto al percentile, stessa logica delle
 # note di contesto sulle metriche di ranking (Cap. 4.11 del notebook).
 ABSOLUTE_UNITS = {"TWh", "TWh eq.", "persone", "international-$", "Mt CO₂eq"}
 
@@ -306,7 +306,7 @@ def percentile_block(entity: str, iso_code: str | None, col: str, label: str, un
     with c2:
         fig = px.histogram(vals, nbins=30, labels={"value": unit}, template="plotly_white")
         fig.add_vline(x=value, line_color=PALETTE["calo"], line_width=3, annotation_text=entity, annotation_position="top")
-        fig.update_layout(height=280, title=f"Distribuzione tra {n} paesi — {label} ({year})", showlegend=False, yaxis_title="Numero di paesi")
+        fig.update_layout(height=280, title=f"Distribuzione tra {n} paesi – {label} ({year})", showlegend=False, yaxis_title="Numero di paesi")
         st.plotly_chart(fig, width="stretch")
 
     if unit in ABSOLUTE_UNITS:
@@ -321,8 +321,8 @@ def main() -> None:
     limit_page_width()
     st.title("🔎 Scheda Paese")
     st.markdown(
-        "Scegli un'entità qualunque — non è vincolata al panel bilanciato usato nel resto della "
-        "dashboard, quindi puoi esplorare anche i casi esclusi (Svizzera, Islanda...), l'Ucraina, o "
+        "Scheda libera su un'entità qualunque: non è vincolata al panel bilanciato usato nel resto "
+        "della dashboard, quindi include anche i casi esclusi (Svizzera, Islanda...), l'Ucraina, o "
         "aggregati come **World**/**Europe**. Ogni grafico mostra solo gli anni per cui esiste "
         "davvero il dato: se una serie inizia tardi o ha un buco, il grafico lo mostra invece di "
         "nasconderlo."
@@ -340,7 +340,7 @@ def main() -> None:
     iso_code = iso.iloc[0] if not iso.empty else None
     is_europe = iso_code in EUROPE_ISO if iso_code else False
     tag = "🇪🇺 Europa" if is_europe else ("🌍 Aggregato/resto del mondo" if iso_code is None else "🌐 Extra-Europa")
-    st.caption(f"**{entity}** — {tag}" + (f" (ISO: {iso_code})" if iso_code else ""))
+    st.caption(f"**{entity}** · {tag}" + (f" (ISO: {iso_code})" if iso_code else ""))
 
     tab_overview, tab_explore, tab_elec, tab_energy, tab_emissioni, tab_dati = st.tabs(
         ["📋 Overview", "🔍 Esplora & confronta", "⚡ Elettricità", "🔥 Energia primaria", "🌍 Emissioni & efficienza", "📄 Dati grezzi"]
@@ -354,7 +354,7 @@ def main() -> None:
         ghg_year, ghg_val = last_valid(d_idx, "ghg_per_capita_elec")
 
         c1, c2, c3, c4, c5 = st.columns(5)
-        c1.metric("Popolazione", human_count(pop_val) if pop_val is not None else "n.d.", help=f"{pop_val:,.0f} persone — ultimo dato: {pop_year}" if pop_val is not None else None)
+        c1.metric("Popolazione", human_count(pop_val) if pop_val is not None else "n.d.", help=f"{pop_val:,.0f} persone (ultimo dato: {pop_year})" if pop_val is not None else None)
         c2.metric("PIL", f"{gdp_val / 1e9:,.0f} Mld $" if gdp_val is not None else "n.d.", help=f"Ultimo dato: {gdp_year}, international-$" if gdp_year else None)
         c3.metric("Generazione elettrica", f"{gen_val:,.0f} TWh" if gen_val is not None else "n.d.", help=f"Ultimo dato: {gen_year}" if gen_year else None)
         c4.metric("Intensità di carbonio", f"{ci_val:.0f} gCO₂/kWh" if ci_val is not None else "n.d.", help=f"Ultimo dato: {ci_year}" if ci_year else None)
@@ -382,12 +382,11 @@ def main() -> None:
 
     with tab_explore:
         st.markdown(
-            "Esplora le metriche del dataset OWID che non hanno già una scheda propria (energia "
-            "primaria, emissioni e quote di mix elettrico si trovano nelle rispettive tab): il grafico "
-            "mostra l'andamento nel tempo. Puoi **sovrapporre una seconda metrica compatibile** (stessa "
-            "unità di misura — es. domanda vs produzione elettrica) per confrontarle sullo stesso asse. "
-            "Sotto trovi dove si colloca questa entità rispetto a tutti gli altri paesi nell'ultimo anno "
-            "disponibile."
+            "Metriche del dataset OWID senza una scheda dedicata (energia primaria, emissioni e quote "
+            "di mix elettrico si trovano nelle rispettive tab): il grafico mostra l'andamento nel tempo. "
+            "Puoi **sovrapporre una seconda metrica compatibile** (stessa unità di misura, ad esempio "
+            "domanda e produzione elettrica) per confrontarle sullo stesso asse. Sotto, il confronto tra "
+            "questa entità e tutti gli altri paesi nell'ultimo anno disponibile."
         )
         category = st.selectbox("Categoria", EXPLORE_CATEGORIES)
         options = available_metrics(d, METRIC_GROUPS[category])
@@ -455,7 +454,7 @@ def main() -> None:
                     long_d, x="year", y=value_name, color="fonte",
                     color_discrete_map=SOURCE_COLORS, category_orders={"fonte": [label for label, _ in available]},
                     labels={"year": "", value_name: "TWh", "fonte": ""},
-                    title=f"Composizione del mix elettrico — {entity}", template="plotly_white",
+                    title=f"Composizione del mix elettrico – {entity}", template="plotly_white",
                 )
                 fig.update_yaxes(rangemode="tozero")
             else:
@@ -463,7 +462,7 @@ def main() -> None:
                     long_d, x="year", y=value_name, color="fonte",
                     color_discrete_map=SOURCE_COLORS, category_orders={"fonte": [label for label, _ in available]},
                     labels={"year": "", value_name: "% della generazione", "fonte": ""},
-                    title=f"Quota di ciascuna fonte — {entity}", template="plotly_white",
+                    title=f"Quota di ciascuna fonte – {entity}", template="plotly_white",
                 )
                 fig.update_yaxes(range=[0, 100])
             fig.update_layout(height=480)
@@ -493,7 +492,7 @@ def main() -> None:
                     long_d, x="year", y=value_name, color="fonte",
                     color_discrete_map=SOURCE_COLORS, category_orders={"fonte": [label for label, _ in available]},
                     labels={"year": "", value_name: "TWh", "fonte": ""},
-                    title=f"Composizione dell'energia primaria — {entity}", template="plotly_white",
+                    title=f"Composizione dell'energia primaria – {entity}", template="plotly_white",
                 )
                 fig.update_yaxes(rangemode="tozero")
             else:
@@ -501,7 +500,7 @@ def main() -> None:
                     long_d, x="year", y=value_name, color="fonte",
                     color_discrete_map=SOURCE_COLORS, category_orders={"fonte": [label for label, _ in available]},
                     labels={"year": "", value_name: "% del consumo energetico", "fonte": ""},
-                    title=f"Quota di ciascuna fonte sull'energia primaria — {entity}", template="plotly_white",
+                    title=f"Quota di ciascuna fonte sull'energia primaria – {entity}", template="plotly_white",
                 )
                 fig.update_yaxes(range=[0, 100])
             fig.update_layout(height=480)
@@ -606,7 +605,7 @@ def main() -> None:
         all_cols_present = [c for c in df_raw.columns if c not in ("country", "iso_code") and d[c].notna().any()]
         default_cols = [c for c in RAW_COLS_DEFAULT if c in all_cols_present]
         chosen_cols = st.multiselect(
-            "Colonne da mostrare/scaricare (di default un sottoinsieme rilevante — aggiungine quante vuoi)",
+            "Colonne da mostrare/scaricare (di default un sottoinsieme rilevante, aggiungine quante vuoi)",
             options=all_cols_present, default=default_cols,
         )
         table = d[chosen_cols].reset_index(drop=True) if chosen_cols else d[default_cols].reset_index(drop=True)

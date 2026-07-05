@@ -1,5 +1,5 @@
 """
-Mix energetico in Europa — Dashboard
+Mix energetico in Europa: Dashboard
 ======================================
 Entrypoint/router: definisce la navigazione (barra in alto, sezioni Esplora/Storia)
 e delega l'esecuzione alla pagina scelta. `st.set_page_config` va chiamato una sola
@@ -18,7 +18,7 @@ Struttura dell'app (vedi pages/):
 Le pagine "Esplora" permettono di scegliere liberamente paesi e periodo, ma restano
 vincolate al panel bilanciato (33 paesi con serie complete 1990-2022, Svizzera e
 Islanda selezionabili a parte con avviso) per evitare di ricreare gli artefatti di
-copertura descritti nel notebook (eda_energia_europa.ipynb, Cap. 3-4) — eccetto
+copertura descritti nel notebook (eda_energia_europa.ipynb, Cap. 3-4), eccetto
 "Scheda Paese", pensata apposta per esplorare una singola entità qualunque senza
 questo vincolo (non serve confrontare serie tra paesi). Le pagine "Storia" hanno una
 narrazione fissa, con al più una piccola libertà di sostituzione.
