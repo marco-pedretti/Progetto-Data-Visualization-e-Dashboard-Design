@@ -24,6 +24,23 @@ from common import PALETTE, SOURCE_NOTE, get_balanced_panel, get_carbon_intensit
 bal_all, complete_countries, _ = get_balanced_panel()
 carbon = get_carbon_intensity()
 
+# Colore neutro per i paesi evidenziati nello scatter: NON PALETTE["calo"] (vermillion), che in
+# tutta la dashboard significa "calo/anomalia" — questi paesi non sono anomalie, sono solo punti di
+# riferimento etichettati. Blu Okabe-Ito, distinto dal grigio dei punti base e sicuro in dark mode.
+HIGHLIGHT_COUNTRY = "#0072B2"
+
+# Posizione dell'etichetta scelta a mano per paese: i sei riferimenti si affollano nella fascia ad
+# alta quota fossile (Germania/Paesi Bassi/Italia) e nell'angolo in basso a sinistra (Francia/Norvegia),
+# dove un unico "top center" farebbe sovrapporre i testi. Ogni etichetta è spostata lontano dai vicini.
+LABEL_POS = {
+    "Germany": "top center",
+    "Netherlands": "bottom center",
+    "Italy": "middle right",
+    "Poland": "middle left",
+    "France": "top center",
+    "Norway": "middle right",  # angolo in basso a sinistra: label a destra per non finire tagliata sull'asse
+}
+
 
 def main() -> None:
     limit_page_width()
@@ -112,12 +129,12 @@ def main() -> None:
         hovertemplate="%{text}<br>Fossile: %{x:.1f}%<br>Intensità: %{y:.0f} gCO₂/kWh<extra></extra>",
         showlegend=False,
     ))
-    for c in ["Germany", "Netherlands", "Poland", "Norway", "France", "Italy"]:
+    for c, pos in LABEL_POS.items():
         row = y_last[y_last["country"] == c]
         if not row.empty:
             fig2.add_trace(go.Scatter(
                 x=row["fossil_share_elec"], y=row["carbon_intensity_elec"], mode="markers+text",
-                marker=dict(color=PALETTE["calo"], size=10), text=[c], textposition="top center",
+                marker=dict(color=HIGHLIGHT_COUNTRY, size=10), text=[c], textposition=pos,
                 showlegend=False, hoverinfo="skip",
             ))
     fig2.update_layout(
@@ -130,16 +147,24 @@ def main() -> None:
     st.plotly_chart(fig2, width="stretch")
     st.caption(f"{SOURCE_NOTE} — panel bilanciato, 33 paesi, {last_year}")
 
-    st.markdown(
-        f"La correlazione è fortissima (**r = {corr_fc:.2f}**): la quota fossile spiega la quasi "
-        "totalità della varianza dell'intensità di carbonio. Ma le due metriche non sono "
-        "intercambiabili: **Germania** (49.5% fossile, 420 gCO₂/kWh) e **Paesi Bassi** (56.4% "
-        "fossile, 326 gCO₂/kWh) hanno quote fossili simili — la Germania perfino più bassa — ma "
-        "un'intensità molto diversa, perché il mix fossile non è omogeneo: il carbone (in "
-        "particolare la lignite tedesca) emette più del gas naturale (dominante nel mix olandese) "
-        "a parità di quota di generazione. La quota fossile dice *quanto* fossile c'è; l'intensità "
-        "di carbonio dice *quanto inquina* quel fossile."
-    )
+    # Numeri ricalcolati dai dati, non scritti a mano (convenzione della dashboard): il confronto
+    # Germania/Paesi Bassi è il fulcro della pagina, deve restare vero se il dato cambia.
+    de = y_last[y_last["country"] == "Germany"]
+    nl = y_last[y_last["country"] == "Netherlands"]
+    if not de.empty and not nl.empty:
+        de_f, de_i = de["fossil_share_elec"].iloc[0], de["carbon_intensity_elec"].iloc[0]
+        nl_f, nl_i = nl["fossil_share_elec"].iloc[0], nl["carbon_intensity_elec"].iloc[0]
+        confronto = "la Germania perfino più bassa" if de_f < nl_f else "molto vicine"
+        st.markdown(
+            f"La correlazione è fortissima (**r = {corr_fc:.2f}**): la quota fossile spiega la quasi "
+            "totalità della varianza dell'intensità di carbonio. Ma le due metriche non sono "
+            f"intercambiabili: **Germania** ({de_f:.1f}% fossile, {de_i:.0f} gCO₂/kWh) e **Paesi Bassi** "
+            f"({nl_f:.1f}% fossile, {nl_i:.0f} gCO₂/kWh) hanno quote fossili simili — {confronto} — ma "
+            "un'intensità molto diversa, perché il mix fossile non è omogeneo: il carbone (in "
+            "particolare la lignite tedesca) emette più del gas naturale (dominante nel mix olandese) "
+            "a parità di quota di generazione. La quota fossile dice *quanto* fossile c'è; l'intensità "
+            "di carbonio dice *quanto inquina* quel fossile."
+        )
 
 
 if __name__ == "__main__":
