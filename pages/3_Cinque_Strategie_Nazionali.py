@@ -38,10 +38,14 @@ from common import (
     load_raw_data,
 )
 
-# Identità dei paesi nei grafici unificati: fino a 4 tinte Okabe-Ito distinte e visibili in
-# dark mode. Non sono i colori delle fonti (niente arancio nucleare / verde rinnovabili /
-# grigio fossile) — qui il colore = il paese.
-COUNTRY_COLORS = ("#0072B2", "#D55E00", "#CC79A7", "#56B4E9")
+# Identità dei paesi nei grafici unificati (Confronto diretto, Crescita): 4 tinte Okabe-Ito ad
+# alto contrasto reciproco. Rosa e azzurro cielo (prima versione) sono stati sostituiti perché
+# troppo simili/deboli accanto a blu e vermiglio (feedback utente 2026-07-04) — questo quartetto
+# (blu/vermiglio/verde/giallo) è il sottoinsieme Okabe-Ito con la massima separazione percettiva
+# reciproca. Il verde riprende la tinta di PALETTE["rinnovabili"], ma senza ambiguità: questa
+# tupla non compare mai nello stesso grafico delle aree per fonte (mix e import/export usano
+# altri colori), quindi qui il verde non è mai visto accanto al suo significato "rinnovabili".
+COUNTRY_COLORS = ("#0072B2", "#D55E00", "#009E73", "#F0E442")
 
 # Layout adattivo: le sezioni "a colonne" (scoreboard, mix) crescono col numero di paesi tenendo
 # ogni colonna larga almeno COL_PX invece di comprimerla; le sezioni di confronto comune (linee
@@ -187,20 +191,20 @@ def main() -> None:
         "metrica a tua scelta e la crescita di una fonte nel tempo."
     )
 
-    with st.expander("⚙️ Opzioni"):
-        include_extra = st.checkbox(
-            "Includi Svizzera e Islanda (serie incomplete 1990-2022, profili estremi)",
-            value=False,
-            help="Esclusi dal panel bilanciato nel resto dell'app: Svizzera nucleare+idro, Islanda 100% rinnovabile.",
-        )
-
-    data = _with_derived(get_extended_panel(EXTRA_COUNTRIES if include_extra else []))
+    # Svizzera e Islanda sono incluse qui (a differenza del panel bilanciato usato altrove
+    # nell'app): il confronto è tra paesi scelti esplicitamente dall'utente, non un aggregato
+    # europeo, quindi le serie incomplete 1990-2022 non alterano nessuna media — sono solo due
+    # profili estremi in più tra cui scegliere (Svizzera nucleare+idro, Islanda 100% rinnovabile).
+    data = _with_derived(get_extended_panel(EXTRA_COUNTRIES))
     options = sorted(data["country"].unique())
 
     selected = st.multiselect(
         "Paesi da confrontare (da 2 a 4)", options, default=["France", "Germany"],
         max_selections=4,
-        help="Il caso base è il testa-a-testa; puoi aggiungere fino a 4 paesi — la pagina adatta le colonne.",
+        help=(
+            "Il caso base è il testa-a-testa; puoi aggiungere fino a 4 paesi — la pagina adatta le "
+            "colonne. Include anche Svizzera e Islanda, escluse altrove per serie incomplete."
+        ),
     )
     if len(selected) < 2:
         st.info("Seleziona almeno due paesi per confrontarli.")
