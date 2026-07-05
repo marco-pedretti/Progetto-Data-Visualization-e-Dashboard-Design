@@ -51,9 +51,6 @@ PANEL_YEAR_START = 1990
 PANEL_YEAR_END = 2022
 
 PROFILE_COUNTRIES = ["France", "Germany", "Poland", "Denmark", "Italy"]
-# Esclusi dal panel bilanciato per serie incomplete 1990-2022 (Cap. 4.1): selezionabili
-# a parte con avviso, mai inclusi di default (Svizzera e Islanda sono casi estremi).
-EXTRA_COUNTRIES = ["Switzerland", "Iceland"]
 
 # Nomi italiani dei paesi del panel (i dati OWID usano l'inglese): la UI è in italiano, così le
 # etichette dei grafici e la prosa restano coerenti. `.get(name, name)` come fallback per entità
@@ -118,38 +115,34 @@ def load_raw_data() -> pd.DataFrame:
     return pd.read_csv(DATA_DIR / "owid-energy-data.csv")
 
 
+@st.cache_data(show_spinner="Carico i dati europei...")
+def get_europe_window() -> pd.DataFrame:
+    """Tutte le righe europee 1990-2022, serie complete o no: universo di selezione per le
+    pagine Esplora (nessun paese europeo escluso, a differenza del panel bilanciato)."""
+    df = load_raw_data()
+    df_eu = df[df["iso_code"].isin(EUROPE_ISO)].copy()
+    return df_eu[(df_eu["year"] >= PANEL_YEAR_START) & (df_eu["year"] <= PANEL_YEAR_END)]
+
+
 @st.cache_data(show_spinner="Costruisco il panel bilanciato...")
 def get_balanced_panel() -> tuple[pd.DataFrame, list[str], list[str]]:
     """Ritorna (bal_all, complete_countries, excluded): panel 1990-2022 con serie complete su KEY_COLS.
 
     Un paese entra nel panel solo se ha dati validi su tutte le KEY_COLS per ogni anno
-    1990-2022 (stessa regola del Cap. 4.1 del notebook).
+    1990-2022 (stessa regola del Cap. 4.1 del notebook). Usato solo dalle pagine Storia, dove
+    la media aggregata richiede serie complete; le pagine Esplora usano invece
+    `get_europe_window()`, senza esclusioni.
     """
-    df = load_raw_data()
-    df_eu = df[df["iso_code"].isin(EUROPE_ISO)].copy()
-    window = df_eu[(df_eu["year"] >= PANEL_YEAR_START) & (df_eu["year"] <= PANEL_YEAR_END)]
-
+    window = get_europe_window()
     complete_countries = sorted(
         country
         for country, grp in window.groupby("country")
         if grp.set_index("year").reindex(range(PANEL_YEAR_START, PANEL_YEAR_END + 1))[KEY_COLS]
         .notna().all().all()
     )
-    excluded = sorted(set(df_eu["country"].unique()) - set(complete_countries))
+    excluded = sorted(set(window["country"].unique()) - set(complete_countries))
     bal_all = window[window["country"].isin(complete_countries)].copy()
     return bal_all, complete_countries, excluded
-
-
-def get_extended_panel(extra_countries: list[str]) -> pd.DataFrame:
-    """Panel bilanciato + eventuali paesi extra (Svizzera/Islanda) richiesti esplicitamente in sidebar."""
-    bal_all, _, _ = get_balanced_panel()
-    if not extra_countries:
-        return bal_all
-    df = load_raw_data()
-    df_eu = df[df["iso_code"].isin(EUROPE_ISO)].copy()
-    window = df_eu[(df_eu["year"] >= PANEL_YEAR_START) & (df_eu["year"] <= PANEL_YEAR_END)]
-    extra = window[window["country"].isin(extra_countries)]
-    return pd.concat([bal_all, extra], ignore_index=True)
 
 
 def weighted_shares(d: pd.DataFrame) -> dict:

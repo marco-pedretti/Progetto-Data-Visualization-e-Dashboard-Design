@@ -3,8 +3,8 @@ Pagina 3: Strategie nazionali a confronto (Esplora)
 =======================================================
 Confronto libero tra due e quattro paesi (default testa-a-testa). Eredita dal vecchio
 "Cinque strategie nazionali" (Cap. 4.3) l'idea che la media europea nasconda traiettorie
-molto diverse, ma la apre a scelta dell'utente: paesi qualunque del panel bilanciato invece
-di cinque profili fissi. Da qui la ricollocazione tra le pagine Esplora.
+molto diverse, ma la apre a scelta dell'utente: paesi qualunque invece di cinque profili
+fissi. Da qui la ricollocazione tra le pagine Esplora.
 
 La pagina alterna due registri, e adatta il numero di colonne ai paesi scelti (2–4):
 - sezioni **a colonne** (una per paese) per ciò che si legge meglio in parallelo ma non si
@@ -17,9 +17,9 @@ La pagina alterna due registri, e adatta il numero di colonne ai paesi scelti (2
   (valore assoluto o indice 1990 = 100, ex pagina "Velocità di crescita" confluita qui: la
   crescita è un dato come gli altri, non una lezione a sé).
 
-Vincolata al panel bilanciato (33 paesi, 1990-2022) come le altre pagine di confronto:
-serie complete = confronto onesto. Svizzera e Islanda restano aggiungibili a parte, con
-avviso, come altrove (Cap. 4.1 del notebook).
+Tutti i paesi europei del dataset sono selezionabili, 1990-2022 (a differenza del panel
+bilanciato a serie complete usato nelle pagine Storia): un paese con una serie più corta
+mostra semplicemente meno anni nei grafici, invece di sparire dalla scelta.
 """
 
 import plotly.express as px
@@ -28,12 +28,10 @@ import streamlit as st
 
 from common import (
     EXPORT_COLOR,
-    EXTRA_COUNTRIES,
     IMPORT_COLOR,
     PALETTE,
     SOURCE_NOTE,
-    get_balanced_panel,
-    get_extended_panel,
+    get_europe_window,
     limit_page_width,
     load_raw_data,
 )
@@ -90,8 +88,6 @@ GROWTH_SOURCES = {
     "Nucleare": "nuclear_electricity",
     "Generazione totale": "electricity_generation",
 }
-
-_, COMPLETE_COUNTRIES, _ = get_balanced_panel()
 
 
 def _with_derived(df):
@@ -191,11 +187,11 @@ def main() -> None:
         "nel tempo."
     )
 
-    # Svizzera e Islanda sono incluse qui (a differenza del panel bilanciato usato altrove
-    # nell'app): il confronto è tra paesi scelti esplicitamente dall'utente, non un aggregato
-    # europeo, quindi le serie incomplete 1990-2022 non alterano nessuna media: sono solo due
-    # profili estremi in più tra cui scegliere (Svizzera nucleare+idro, Islanda 100% rinnovabile).
-    data = _with_derived(get_extended_panel(EXTRA_COUNTRIES))
+    # Tutti i paesi europei sono inclusi qui (a differenza del panel bilanciato usato nelle
+    # pagine Storia): il confronto è tra paesi scelti esplicitamente dall'utente, non un
+    # aggregato europeo, quindi una serie incompleta non altera nessuna media, mostra solo
+    # meno anni nei grafici.
+    data = _with_derived(get_europe_window())
     options = sorted(data["country"].unique())
 
     selected = st.multiselect(
@@ -203,7 +199,7 @@ def main() -> None:
         max_selections=4,
         help=(
             "Il caso base è il testa-a-testa; fino a 4 paesi, la pagina adatta le colonne di "
-            "conseguenza. Include anche Svizzera e Islanda, escluse altrove per serie incomplete."
+            "conseguenza. Tutti i paesi europei sono selezionabili, anche con serie più corte."
         ),
     )
     if len(selected) < 2:
@@ -302,7 +298,7 @@ def main() -> None:
             fig.update_yaxes(rangemode="tozero")
         st.plotly_chart(fig, width="stretch")
 
-        note = f"{SOURCE_NOTE} · panel bilanciato, 1990–2022"
+        note = f"{SOURCE_NOTE} · 1990–2022"
         if is_abs:
             note += " · ⚠️ valore assoluto: riflette anche la dimensione del paese, non solo la strategia"
         st.caption(note)

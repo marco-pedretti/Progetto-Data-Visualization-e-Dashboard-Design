@@ -126,7 +126,7 @@ st.divider()
 # Panel bilanciato solo per la nota metodologica in fondo (numeri ricalcolati, non a mano).
 _, complete_countries, excluded = get_balanced_panel()
 st.caption(
-    f"{SOURCE_NOTE}. Panel bilanciato: {len(complete_countries)} paesi europei con serie "
-    f"complete {PANEL_YEAR_START}–{PANEL_YEAR_END}. Esclusi (serie incomplete): {', '.join(excluded)}. "
-    "Svizzera e Islanda restano comunque selezionabili nelle pagine Esplora."
+    f"{SOURCE_NOTE}. Panel bilanciato (usato nelle pagine Storia): {len(complete_countries)} "
+    f"paesi europei con serie complete {PANEL_YEAR_START}–{PANEL_YEAR_END}. Esclusi dal panel "
+    f"(serie incomplete): {', '.join(excluded)}, comunque selezionabili in tutte le pagine Esplora."
 )
