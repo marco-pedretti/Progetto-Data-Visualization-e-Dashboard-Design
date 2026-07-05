@@ -314,30 +314,22 @@ def percentile_block(entity: str, iso_code: str | None, col: str, label: str, un
         )
 
 
-def sidebar_controls() -> dict:
-    with st.sidebar:
-        st.header("🔧 Filtri")
-        entity = st.selectbox(
-            "Paese o entità (qualunque, mondo incluso)",
-            ALL_ENTITIES, index=ALL_ENTITIES.index(DEFAULT_ENTITY),
-            help='Non solo i 33 paesi del panel bilanciato: anche Svizzera/Islanda/Ucraina e aggregati come "World" o "Europe".',
-        )
-    return dict(entity=entity)
-
-
 def main() -> None:
     limit_page_width()
     st.title("🔎 Scheda Paese")
     st.markdown(
-        "Scegli un'entità qualunque in sidebar — non è vincolata al panel bilanciato usato nel "
-        "resto della dashboard, quindi puoi esplorare anche i casi esclusi (Svizzera, Islanda...), "
-        "l'Ucraina, o aggregati come **World**/**Europe**. Ogni grafico mostra solo gli anni per cui "
-        "esiste davvero il dato: se una serie inizia tardi o ha un buco, il grafico lo mostra invece "
-        "di nasconderlo."
+        "Scegli un'entità qualunque — non è vincolata al panel bilanciato usato nel resto della "
+        "dashboard, quindi puoi esplorare anche i casi esclusi (Svizzera, Islanda...), l'Ucraina, o "
+        "aggregati come **World**/**Europe**. Ogni grafico mostra solo gli anni per cui esiste "
+        "davvero il dato: se una serie inizia tardi o ha un buco, il grafico lo mostra invece di "
+        "nasconderlo."
     )
 
-    f = sidebar_controls()
-    entity = f["entity"]
+    entity = st.selectbox(
+        "Paese o entità (qualunque, mondo incluso)",
+        ALL_ENTITIES, index=ALL_ENTITIES.index(DEFAULT_ENTITY),
+        help='Non solo i 33 paesi del panel bilanciato: anche Svizzera/Islanda/Ucraina e aggregati come "World" o "Europe".',
+    )
     d = df_raw[df_raw["country"] == entity].sort_values("year")
     d_idx = d.set_index("year")
 
