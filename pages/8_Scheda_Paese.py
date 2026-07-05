@@ -459,13 +459,12 @@ def main() -> None:
                 )
                 fig.update_yaxes(rangemode="tozero")
             else:
-                fig = px.line(
+                fig = px.area(
                     long_d, x="year", y=value_name, color="fonte",
                     color_discrete_map=SOURCE_COLORS, category_orders={"fonte": [label for label, _ in available]},
                     labels={"year": "", value_name: "% della generazione", "fonte": ""},
                     title=f"Quota di ciascuna fonte — {entity}", template="plotly_white",
                 )
-                fig.update_traces(line=dict(width=2.5))
                 fig.update_yaxes(range=[0, 100])
             fig.update_layout(height=480)
             st.plotly_chart(fig, width="stretch")
@@ -498,13 +497,12 @@ def main() -> None:
                 )
                 fig.update_yaxes(rangemode="tozero")
             else:
-                fig = px.line(
+                fig = px.area(
                     long_d, x="year", y=value_name, color="fonte",
                     color_discrete_map=SOURCE_COLORS, category_orders={"fonte": [label for label, _ in available]},
                     labels={"year": "", value_name: "% del consumo energetico", "fonte": ""},
                     title=f"Quota di ciascuna fonte sull'energia primaria — {entity}", template="plotly_white",
                 )
-                fig.update_traces(line=dict(width=2.5))
                 fig.update_yaxes(range=[0, 100])
             fig.update_layout(height=480)
             st.plotly_chart(fig, width="stretch")
