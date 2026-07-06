@@ -13,8 +13,8 @@ notebook, qui visibile a scelta su qualunque entità).
 A differenza delle altre pagine, qui il taglio non è "fossile/nucleare/
 rinnovabili": quel confronto è già il tema di mappa, storia e confronti
 altrove nell'app. Questa scheda copre l'intero dataset elettrico/energetico
-OWID (energia primaria, emissioni del settore elettrico, import/export,
-pro-capite) con un esploratore libero a scelta dell'utente, non un percorso
+OWID (energia primaria, emissioni del settore elettrico, import/export)
+con un esploratore libero a scelta dell'utente, non un percorso
 fisso, coerente con l'idea di lasciare la massima discrezionalità qui
 (scelta esplicita dell'utente).
 """
@@ -69,7 +69,7 @@ SOURCE_COLORS = {
 }
 
 # Esploratore libero: ogni voce è (etichetta, colonna, unità). Raggruppate per tema così
-# l'utente sceglie prima l'area (elettricità / energia primaria / emissioni / pro-capite /
+# l'utente sceglie prima l'area (elettricità / energia primaria / emissioni /
 # import-export) e poi la metrica specifica, invece di scorrere una lista piatta di ~70 voci.
 METRIC_GROUPS: dict[str, list[tuple[str, str, str]]] = {
     "⚡ Elettricità per fonte": [
@@ -137,17 +137,6 @@ METRIC_GROUPS: dict[str, list[tuple[str, str, str]]] = {
         ("Gas", "gas_production", "TWh eq."),
         ("Petrolio", "oil_production", "TWh eq."),
     ],
-    "👤 Pro-capite": [
-        ("Popolazione", "population", "persone"),
-        ("PIL", "gdp", "international-$"),
-        ("Energia (tutte le fonti)", "energy_per_capita", "kWh/persona"),
-        ("Elettricità generata", "per_capita_electricity", "kWh/persona"),
-        ("Elettricità richiesta", "electricity_demand_per_capita", "kWh/persona"),
-        ("Da fossili", "fossil_energy_per_capita", "kWh/persona"),
-        ("Da rinnovabili", "renewables_energy_per_capita", "kWh/persona"),
-        ("Da nucleare", "nuclear_energy_per_capita", "kWh/persona"),
-        ("Da low-carbon", "low_carbon_energy_per_capita", "kWh/persona"),
-    ],
     "🌍 Emissioni & efficienza": [
         ("Emissioni del settore elettrico", "greenhouse_gas_emissions", "Mt CO₂eq"),
         ("Emissioni pro-capite (settore elettrico)", "ghg_per_capita_elec", "t CO₂eq/persona"),
@@ -164,7 +153,7 @@ METRIC_GROUPS: dict[str, list[tuple[str, str, str]]] = {
 # dell'utente 2026-07-04, per non duplicare): le quote di mix elettrico vivono nella tab
 # "Elettricità", l'energia primaria e la produzione fossile nella tab "Energia primaria", le
 # emissioni/efficienza nella tab "Emissioni & efficienza". Restano qui i temi senza scheda propria:
-# l'elettricità in volume (dove vivono generazione e domanda), il pro-capite e l'import/export.
+# l'elettricità in volume (dove vivono generazione e domanda) e l'import/export.
 EXPLORE_EXCLUDED = {
     "⚡ Quota sulla generazione elettrica",
     "🔥 Energia primaria per fonte",
@@ -312,8 +301,7 @@ def percentile_block(entity: str, iso_code: str | None, col: str, label: str, un
     if unit in ABSOLUTE_UNITS:
         st.caption(
             "⚠️ Metrica in valore assoluto: il rank riflette anche la dimensione del paese, non solo "
-            "una performance. Per un confronto a parità di dimensione usa le quote (%) o le metriche "
-            "pro-capite."
+            "una performance. Per un confronto a parità di dimensione usa le quote (%)."
         )
 
 
