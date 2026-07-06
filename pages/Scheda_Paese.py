@@ -381,8 +381,6 @@ def main() -> None:
 
     with tab_explore:
         st.markdown(
-            "Metriche del dataset OWID senza una scheda dedicata (energia primaria, emissioni e quote "
-            "di mix elettrico si trovano nelle rispettive tab): il grafico mostra l'andamento nel tempo. "
             "Puoi **sovrapporre una seconda metrica compatibile** (stessa unità di misura, ad esempio "
             "domanda e produzione elettrica) per confrontarle sullo stesso asse. Sotto, il confronto tra "
             "questa entità e tutti gli altri paesi nell'ultimo anno disponibile."
