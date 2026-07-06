@@ -33,8 +33,8 @@ SOURCE_NOTE = "Fonte: OWID Energy Dataset (Ember; Energy Institute)"
 
 # Colore per i punti "evidenziati" negli scatter (paesi di riferimento/eccezione): blu Okabe-Ito,
 # NON PALETTE["calo"] (vermillion), che in tutta la dashboard significa "calo/anomalia": i punti
-# evidenziati non sono anomalie, sono solo riferimenti. Condiviso tra le pagine con scatter
-# (Intensità di carbonio, Chi sostituisce chi) così l'evidenza ha sempre lo stesso significato.
+# evidenziati non sono anomalie, sono solo riferimenti. Usato negli scatter della pagina
+# "Chi sostituisce chi" così l'evidenza ha sempre lo stesso significato.
 HIGHLIGHT_COUNTRY = "#0072B2"
 
 # Import/export netto: il segno è una direzione (chi compra vs chi vende elettricità), non un
@@ -65,7 +65,7 @@ IT_NAME = {
     "Sweden": "Svezia", "Ukraine": "Ucraina", "United Kingdom": "Regno Unito",
 }
 
-# Cap. 4.7: i 5 paesi isolati in 4.5 come eccezione (calo nucleare concomitante alla crescita
+# Cap. 4.6: i 5 paesi isolati in 4.5 come eccezione (calo nucleare concomitante alla crescita
 # rinnovabile), con l'evento politico che spiega il declino: anno e didascalia verificati contro
 # il picco/valore 2022 reale di nuclear_share_elec, non solo affermati.
 NUCLEAR_EVENTS = {
@@ -168,33 +168,13 @@ def get_share_deltas(bal_all: pd.DataFrame, year_start: int, year_end: int) -> p
     })
 
 
-@st.cache_data(show_spinner="Calcolo l'intensità di carbonio...")
-def get_carbon_intensity() -> pd.DataFrame:
-    """Intensità di carbonio (gCO2eq/kWh): media pesata sul panel bilanciato + validazione OWID.
-
-    Esclude dal calcolo, numeratore e denominatore insieme, le righe senza carbon_intensity_elec:
-    la Russia non ha questa colonna per il 1990-1999 e, se non esclusa da entrambi i lati del
-    rapporto, abbassa artificialmente la media proprio nei primi anni (bug trovato e corretto nel
-    Cap. 4.6 del notebook). "europe_owid" è l'aggregato pubblicato direttamente da OWID, usato lì
-    come validazione indipendente del calcolo sul panel.
-    """
-    bal_all, _, _ = get_balanced_panel()
-    valid = bal_all[bal_all["carbon_intensity_elec"].notna()]
-    panel_avg = valid.groupby("year").apply(
-        lambda g: (g["carbon_intensity_elec"] * g["electricity_generation"]).sum() / g["electricity_generation"].sum()
-    )
-    df = load_raw_data()
-    europe_owid = df[df["country"] == "Europe"].set_index("year")["carbon_intensity_elec"].reindex(panel_avg.index)
-    return pd.DataFrame({"panel_bilanciato": panel_avg, "europe_owid": europe_owid})
-
-
 @st.cache_data(show_spinner="Carico la storia del nucleare...")
 def get_nuclear_history(countries: list[str]) -> pd.DataFrame:
     """Quota nucleare 1985-2022 per un elenco di paesi, dalla serie estesa (non il panel bilanciato).
 
     Serve perché il picco storico di alcuni paesi (Belgio 1986, Lituania 1993) cade a ridosso o
     prima della soglia 1990 del panel bilanciato (Cap. 4.1): qui non serve la completezza su tutte
-    le KEY_COLS, solo nuclear_share_elec (Cap. 4.7 del notebook).
+    le KEY_COLS, solo nuclear_share_elec (Cap. 4.6 del notebook).
     """
     df = load_raw_data()
     df_eu = df[df["iso_code"].isin(EUROPE_ISO)].copy()
@@ -212,8 +192,9 @@ def get_world_data() -> pd.DataFrame:
 def get_scope_kpis(df_year: pd.DataFrame) -> dict:
     """KPI pesati (generazione, quote, intensità di carbonio) su un blocco dati di un solo anno.
 
-    Stessa regola di mascheramento NaN del Cap. 4.6: l'intensità di carbonio esclude,
-    numeratore e denominatore insieme, i paesi senza carbon_intensity_elec quell'anno.
+    Mascheramento NaN per l'intensità di carbonio: esclude, numeratore e denominatore insieme,
+    i paesi senza carbon_intensity_elec quell'anno (es. la Russia non ha la colonna per il
+    1990-1999), che altrimenti abbasserebbero artificialmente la media pesata.
     """
     shares = weighted_shares(df_year)
     ci_valid = df_year[df_year["carbon_intensity_elec"].notna()]

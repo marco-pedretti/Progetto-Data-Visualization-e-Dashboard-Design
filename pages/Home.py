@@ -83,8 +83,6 @@ with col_storia:
     st.caption("Narrazione guidata su un risultato specifico e verificato, pensata per comunicare, non per esplorare.")
     st.page_link("pages/Chi_Sostituisce_Chi.py", label="Chi sostituisce chi", icon="🔀")
     st.caption("Quando il mix cambia, cosa rimpiazza cosa davvero?")
-    st.page_link("pages/Intensita_di_Carbonio.py", label="Intensità di carbonio", icon="🌍")
-    st.caption("Il mix si è ripulito, ma le emissioni per kWh?")
     st.page_link("pages/Declino_Nucleare.py", label="Declino del nucleare", icon="☢️")
     st.caption("Ogni crollo del nucleare ha un evento preciso dietro.")
     st.page_link("pages/Firme_Storiche.py", label="Firme storiche nei dati", icon="🕰️")

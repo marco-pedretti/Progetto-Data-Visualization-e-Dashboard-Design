@@ -52,7 +52,6 @@ The top menu splits the pages into two families:
 | Page | Question |
 |---|---|
 | **Chi sostituisce chi** (Who replaces whom) | When renewables grow, at the expense of which source (fossil or nuclear)? |
-| **Intensità di carbonio** (Carbon intensity) | The mix got cleaner, but what about emissions per kWh? |
 | **Declino del nucleare** (Nuclear decline) | Every nuclear collapse has a precise political event behind it. |
 | **Firme storiche nei dati** (Historical signatures in the data) | Missing data as a geopolitical indicator. |
 
@@ -73,7 +72,6 @@ stay correct as the parameters change.
 │   ├── Strategie_a_Confronto.py
 │   ├── Mappa_Europa_Mondo.py
 │   ├── Chi_Sostituisce_Chi.py
-│   ├── Intensita_di_Carbonio.py
 │   ├── Declino_Nucleare.py
 │   └── Firme_Storiche.py
 ├── data/                         # raw OWID dataset + codebook

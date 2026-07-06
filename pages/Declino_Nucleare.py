@@ -1,7 +1,7 @@
 """
 Declino del nucleare (Storia)
 =============================
-Corrisponde al Cap. 4.7 del notebook: i cinque paesi già isolati in "Chi sostituisce
+Corrisponde al Cap. 4.6 del notebook: i cinque paesi già isolati in "Chi sostituisce
 chi" (Cap. 4.5) come eccezione (dove il calo del nucleare coincide con la crescita
 rinnovabile, non con il fossile) mostrano ciascuno un picco storico seguito da un
 evento politico preciso, non un trend generico. Serie estesa dal 1985 (non il solo
@@ -178,8 +178,7 @@ def main() -> None:
         "2022: un phase-out annunciato non è un crollo immediato. La **Francia**, infine, è il caso "
         "più lento di tutti: picca nel 2006 (79.4%) e nel 2022 è ancora al 62.9%, nonostante la "
         "legge del 2015 avesse fissato un obiettivo del 50% mai raggiunto: il calo puntuale del "
-        "2022 (vedi la pagina **Intensità di carbonio**) è dovuto a un evento congiunturale "
-        "(corrosione, siccità), non alla legge."
+        "2022 è dovuto a un evento congiunturale (corrosione, siccità), non alla legge."
     )
 
 

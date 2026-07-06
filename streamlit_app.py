@@ -11,7 +11,6 @@ Struttura dell'app (vedi pages/):
     Mappa_Europa_Mondo      → Esplora: coropleta con ambito/metrica/anno liberi
     Scheda_Paese            → Esplora: scheda libera su un'entità qualunque, mondo incluso
     Chi_Sostituisce_Chi     → Storia: ranking e correlazione, narrazione guidata
-    Intensita_di_Carbonio   → Storia: decarbonizzazione, narrazione guidata
     Declino_Nucleare        → Storia: picco/evento/crollo del nucleare, narrazione guidata
     Firme_Storiche          → Storia: i dati mancanti come indicatore geopolitico (Cap. 3.4)
 
@@ -59,7 +58,6 @@ pages = st.navigation(
         ],
         "Storia": [
             st.Page("pages/Chi_Sostituisce_Chi.py", title="Chi sostituisce chi", icon="🔀"),
-            st.Page("pages/Intensita_di_Carbonio.py", title="Intensità di carbonio", icon="🌍"),
             st.Page("pages/Declino_Nucleare.py", title="Declino del nucleare", icon="☢️"),
             st.Page("pages/Firme_Storiche.py", title="Firme storiche nei dati", icon="🕰️"),
         ],

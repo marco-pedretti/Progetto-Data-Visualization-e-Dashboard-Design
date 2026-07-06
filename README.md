@@ -49,7 +49,6 @@ Il menu (in alto) divide le pagine in due famiglie:
 | Pagina | Domanda |
 |---|---|
 | **Chi sostituisce chi** | Quando le rinnovabili crescono, a scapito di quale fonte (fossile o nucleare)? |
-| **Intensità di carbonio** | Il mix si è ripulito, ma le emissioni per kWh? |
 | **Declino del nucleare** | Ogni crollo del nucleare ha un evento politico preciso dietro. |
 | **Firme storiche nei dati** | I dati mancanti come indicatore geopolitico. |
 
@@ -70,7 +69,6 @@ restano corretti al variare dei parametri.
 │   ├── Strategie_a_Confronto.py
 │   ├── Mappa_Europa_Mondo.py
 │   ├── Chi_Sostituisce_Chi.py
-│   ├── Intensita_di_Carbonio.py
 │   ├── Declino_Nucleare.py
 │   └── Firme_Storiche.py
 ├── data/                         # dataset OWID grezzo + codebook
